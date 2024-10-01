@@ -13,7 +13,7 @@ const replacePathVariables = (path: string, pathVariables: Record<string, string
 };
 
 interface UseXFetchParams {
-    searchParams?: Record<string, string>;
+    queryParams?: Record<string, string>;
     pathVariables?: Record<string, string>;
 }
 
@@ -45,7 +45,7 @@ export function useXFetch<T>(
 
 interface UseXMutationParams<B> {
     pathVariables?: Record<string, string>;
-    searchParams?: Record<string, string>;
+    queryParams?: Record<string, string>;
     data?: B;
 }
 
