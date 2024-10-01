@@ -1,0 +1,27 @@
+{
+    "name": "@andre-hctulc/use-xfetch",
+    "version": "0.0.1",
+    "description": "swr/xfetch wrapper",
+    "main": "dist/index.js",
+    "scripts": {
+        "build": "tsc",
+        "tc": "tsc --noEmit",
+        "tc:watch": "tsc -w --noEmit",
+        "test": "echo \"Error: no test specified\" && exit 1",
+        "deploy": "npm run tc && npm publish"
+    },
+    "author": "André Thomas",
+    "license": "ISC",
+    "devDependencies": {
+        "@types/node": "^22.5.5",
+        "@types/react": "^18.3.10"
+    },
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/andre-hctulc/use-xfetch.git"
+    },
+    "dependencies": {
+        "@andre-hctulc/xfetch": "^1.0.4",
+        "swr": "^2.2.5"
+    }
+}
