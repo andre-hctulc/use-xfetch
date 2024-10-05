@@ -6,23 +6,25 @@ import useSWR from "swr";
 const replacePathVariables = (path: string, pathVariables: Record<string, string>) => {
     return path.replace(/\{([^}]+)\}/g, (_, key) => {
         if (key in pathVariables) {
-            return pathVariables[key];
+            return pathVariables[key] + "";
         }
         return `{${key}}`;
     });
 };
 
-interface UseXFetchParams {
+export interface UseXFetchParams {
     queryParams?: Record<string, string>;
     pathVariables?: Record<string, string>;
 }
 
+export type Disabled = null | false | undefined | 0;
+
 /**
- * Use path variables like this: _/api/{id}_
+ * Use path variables like this: _/api/project/{id}_
  */
-export function useXFetch<T>(
+export function useXFetch<T = any>(
     path: string,
-    params: UseXFetchParams | null | false | undefined | 0,
+    params: UseXFetchParams | Disabled,
     options?: { requestInit?: XRequestInit; swr?: SWRConfiguration<T, FetchError> }
 ) {
     const p = React.useMemo<string | null>(() => {
@@ -43,12 +45,15 @@ export function useXFetch<T>(
     return query;
 }
 
-interface UseXMutationParams<B> {
+export interface UseXMutationParams<B> {
     pathVariables?: Record<string, string>;
     queryParams?: Record<string, string>;
     data?: B;
 }
 
+/**
+ * Use path variables like this: _/api/project/{id}_
+ */
 export function useXMutation<R, B>(path: string, options?: { requestInit?: XRequestInit }) {
     const [error, setError] = React.useState<FetchError | null>(null);
     const [isMutating, setIsMutating] = React.useState(false);
