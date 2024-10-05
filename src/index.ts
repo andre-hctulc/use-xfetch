@@ -17,7 +17,7 @@ export interface UseXFetchParams {
     pathVariables?: Record<string, string>;
 }
 
-export type Disabled = null | false | undefined | 0;
+export type Disabled = null | false | undefined | "" | 0;
 
 /**
  * Use path variables like this: _/api/project/{id}_
