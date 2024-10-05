@@ -106,15 +106,15 @@ export function useXMutation<R, B>(path: string, options?: UseXMutationOptions<R
     const [isSuccess, setIsSuccess] = React.useState(false);
     const [data, setData] = React.useState<R | undefined>(undefined);
     const isError = error !== null;
-    const abortSignal = React.useRef<AbortController | null>(null);
+    const abortController = React.useRef<AbortController | null>(null);
 
     const mutate = React.useCallback(
         (method: string, params: UseXMutationParams<B>, requestInit?: XRequestInit) => {
-            if (abortSignal.current) {
-                abortSignal.current.abort();
+            if (abortController.current) {
+                abortController.current.abort();
             }
 
-            const currentAbortSignal = (abortSignal.current = new AbortController());
+            const currentAbortController = (abortController.current = new AbortController());
 
             setError(null);
             setIsSuccess(false);
@@ -125,7 +125,7 @@ export function useXMutation<R, B>(path: string, options?: UseXMutationOptions<R
 
             return xmutate<R, B>(method, p, params.data!, { ...options?.requestInit, ...requestInit })
                 .then((responseData) => {
-                    if (!currentAbortSignal.signal.aborted) {
+                    if (!currentAbortController.signal.aborted) {
                         setIsSuccess(true);
                         setError(null);
                         setData(responseData);
@@ -134,7 +134,7 @@ export function useXMutation<R, B>(path: string, options?: UseXMutationOptions<R
                     return responseData;
                 })
                 .catch((err) => {
-                    if (!currentAbortSignal.signal.aborted) {
+                    if (!currentAbortController.signal.aborted) {
                         setError(err);
                         setIsSuccess(false);
                         setData(undefined);
@@ -142,7 +142,7 @@ export function useXMutation<R, B>(path: string, options?: UseXMutationOptions<R
                     throw err;
                 })
                 .finally(() => {
-                    if (!currentAbortSignal.signal.aborted) setIsMutating(false);
+                    if (!currentAbortController.signal.aborted) setIsMutating(false);
                 });
         },
         []
@@ -171,6 +171,15 @@ export function useXMutation<R, B>(path: string, options?: UseXMutationOptions<R
             options.onError(error);
         }
     }, [error]);
+
+    // Cleanup
+    React.useEffect(() => {
+        return () => {
+            if (abortController.current) {
+                abortController.current.abort();
+            }
+        };
+    }, []);
 
     return { del, post, put, mutate, error, isSuccess, isMutating, isError, data };
 }
