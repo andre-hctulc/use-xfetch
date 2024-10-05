@@ -1,6 +1,6 @@
 import { FetchError, xfetch, xmutate, type XRequestInit } from "@andre-hctulc/xfetch";
 import React from "react";
-import type { SWRConfiguration } from "swr";
+import type { SWRConfiguration, SWRResponse } from "swr";
 import useSWR from "swr";
 
 const replacePathVariables = (path: string, pathVariables: Record<string, string>) => {
@@ -19,15 +19,26 @@ export interface UseXFetchParams {
 
 export type Disabled = null | false | undefined | "" | 0;
 
+export type XFetchResult<T> = SWRResponse<T, FetchError>;
+
+export type UseXFetchOptions<T> = {
+    requestInit?: XRequestInit;
+    swr?: SWRConfiguration<T, FetchError>;
+    onError?: (error: FetchError) => void;
+    onSuccess?: (data: T | undefined) => void;
+};
+
 /**
  * Use path variables like this: _/api/project/{id}_
  */
 export function useXFetch<T = any>(
     path: string,
     params: UseXFetchParams | Disabled,
-    options?: { requestInit?: XRequestInit; swr?: SWRConfiguration<T, FetchError> }
-) {
+    options?: UseXFetchOptions<T>
+): XFetchResult<T> {
+    const started = React.useRef(false);
     const p = React.useMemo<string | null>(() => {
+        // control disabled by checking if params is falsy
         if (!params) return null;
         return params.pathVariables ? replacePathVariables(path, params.pathVariables) : path;
     }, [path, !!params && params.pathVariables]);
@@ -42,6 +53,23 @@ export function useXFetch<T = any>(
         ...options?.swr,
     });
 
+    React.useEffect(() => {
+        if (query.isValidating) {
+            started.current = true;
+        }
+
+        // check if started. isValidating can idle to false if the query mounts as disabled
+        if (!query.isValidating && started.current && options?.onSuccess) {
+            options.onSuccess(query.data);
+        }
+    }, [query.isValidating]);
+
+    React.useEffect(() => {
+        if (query.error && options?.onError) {
+            options.onError(query.error);
+        }
+    }, [query.error]);
+
     return query;
 }
 
@@ -51,13 +79,32 @@ export interface UseXMutationParams<B> {
     data?: B;
 }
 
+export type XMutateResult<R, B> = {
+    del: (params: UseXMutationParams<B>, requestInit?: XRequestInit) => Promise<R>;
+    post: (params: UseXMutationParams<B>, requestInit?: XRequestInit) => Promise<R>;
+    put: (params: UseXMutationParams<B>, requestInit?: XRequestInit) => Promise<R>;
+    mutate: (method: string, params: UseXMutationParams<B>, requestInit?: XRequestInit) => Promise<R>;
+    error: FetchError | null;
+    isSuccess: boolean;
+    isMutating: boolean;
+    isError: boolean;
+    data: R | undefined;
+};
+
+export type UseXMutationOptions<R> = {
+    requestInit?: XRequestInit;
+    onSuccess?: (data: R) => void;
+    onError?: (error: FetchError) => void;
+};
+
 /**
  * Use path variables like this: _/api/project/{id}_
  */
-export function useXMutation<R, B>(path: string, options?: { requestInit?: XRequestInit }) {
+export function useXMutation<R, B>(path: string, options?: UseXMutationOptions<R>): XMutateResult<R, B> {
     const [error, setError] = React.useState<FetchError | null>(null);
     const [isMutating, setIsMutating] = React.useState(false);
     const [isSuccess, setIsSuccess] = React.useState(false);
+    const [data, setData] = React.useState<R | undefined>(undefined);
     const isError = error !== null;
     const abortSignal = React.useRef<AbortController | null>(null);
 
@@ -72,6 +119,7 @@ export function useXMutation<R, B>(path: string, options?: { requestInit?: XRequ
             setError(null);
             setIsSuccess(false);
             setIsMutating(true);
+            setData(undefined);
 
             const p = params.pathVariables ? replacePathVariables(path, params.pathVariables) : path;
 
@@ -80,6 +128,7 @@ export function useXMutation<R, B>(path: string, options?: { requestInit?: XRequ
                     if (!currentAbortSignal.signal.aborted) {
                         setIsSuccess(true);
                         setError(null);
+                        setData(responseData);
                     }
 
                     return responseData;
@@ -88,6 +137,7 @@ export function useXMutation<R, B>(path: string, options?: { requestInit?: XRequ
                     if (!currentAbortSignal.signal.aborted) {
                         setError(err);
                         setIsSuccess(false);
+                        setData(undefined);
                     }
                     throw err;
                 })
@@ -110,5 +160,17 @@ export function useXMutation<R, B>(path: string, options?: { requestInit?: XRequ
         [mutate]
     );
 
-    return { del, post, put, mutate, error, isSuccess, isMutating, isError };
+    React.useEffect(() => {
+        if (isSuccess && options?.onSuccess) {
+            options.onSuccess(data!);
+        }
+    }, [isSuccess]);
+
+    React.useEffect(() => {
+        if (error && options?.onError) {
+            options.onError(error);
+        }
+    }, [error]);
+
+    return { del, post, put, mutate, error, isSuccess, isMutating, isError, data };
 }
