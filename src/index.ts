@@ -37,13 +37,13 @@ export function useXFetch<T = any>(
     options?: UseXFetchOptions<T>
 ): XFetchResult<T> {
     const started = React.useRef(false);
-    const p = React.useMemo<string | null>(() => {
+    const parsedPath = React.useMemo<string | null>(() => {
         // control disabled by checking if params is falsy
         if (!params) return null;
         return params.pathVariables ? replacePathVariables(path, params.pathVariables) : path;
     }, [path, !!params && params.pathVariables]);
 
-    const query = useSWR<T, FetchError>(params && p ? { ...params, path } : null, {
+    const query = useSWR<T, FetchError>(params && parsedPath ? { ...params, path: parsedPath } : null, {
         fetcher: (fetcherParams: UseXFetchParams & { path: string }) => {
             return xfetch<T>(fetcherParams.path, {
                 ...options?.requestInit,
@@ -121,9 +121,12 @@ export function useXMutation<R, B>(path: string, options?: UseXMutationOptions<R
             setIsMutating(true);
             setData(undefined);
 
-            const p = params.pathVariables ? replacePathVariables(path, params.pathVariables) : path;
+            const parsedPath = params.pathVariables ? replacePathVariables(path, params.pathVariables) : path;
 
-            return xmutate<R, B>(method, p, params.data!, { ...options?.requestInit, ...requestInit })
+            return xmutate<R, B>(method, parsedPath, params.data!, {
+                ...options?.requestInit,
+                ...requestInit,
+            })
                 .then((responseData) => {
                     if (!currentAbortController.signal.aborted) {
                         setIsSuccess(true);
