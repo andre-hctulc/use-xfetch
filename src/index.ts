@@ -44,10 +44,10 @@ export function useXFetch<T = any>(
     }, [path, !!params && params.pathVariables]);
 
     const query = useSWR<T, FetchError>(params && p ? { ...params, path } : null, {
-        fetcher: (params) => {
-            return xfetch<T>(params.path, {
+        fetcher: (fetcherParams: UseXFetchParams & { path: string }) => {
+            return xfetch<T>(fetcherParams.path, {
                 ...options?.requestInit,
-                queryParams: { ...options?.requestInit, ...params.searchParams },
+                queryParams: { ...options?.requestInit?.queryParams, ...fetcherParams.queryParams },
             });
         },
         ...options?.swr,
