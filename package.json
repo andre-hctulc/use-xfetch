@@ -1,6 +1,6 @@
 {
     "name": "@andre-hctulc/use-xfetch",
-    "version": "0.0.8",
+    "version": "0.0.9",
     "description": "swr/xfetch wrapper",
     "main": "dist/index.js",
     "scripts": {
