@@ -79,7 +79,7 @@ export interface UseXMutationParams<B> {
     data?: B;
 }
 
-export type XMutateResult<R, B> = {
+export type XMutateResult<B, R> = {
     del: (params: UseXMutationParams<B>, requestInit?: XRequestInit) => Promise<R>;
     post: (params: UseXMutationParams<B>, requestInit?: XRequestInit) => Promise<R>;
     put: (params: UseXMutationParams<B>, requestInit?: XRequestInit) => Promise<R>;
@@ -100,7 +100,7 @@ export type UseXMutationOptions<R> = {
 /**
  * Use path variables like this: _/api/project/{id}_
  */
-export function useXMutation<R, B>(path: string, options?: UseXMutationOptions<R>): XMutateResult<R, B> {
+export function useXMutation<B, R>(path: string, options?: UseXMutationOptions<R>): XMutateResult<B, R> {
     const [error, setError] = React.useState<FetchError | null>(null);
     const [isMutating, setIsMutating] = React.useState(false);
     const [isSuccess, setIsSuccess] = React.useState(false);
