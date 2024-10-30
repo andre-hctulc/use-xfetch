@@ -36,10 +36,10 @@ export type UseXFetchOptions<T> = {
 };
 
 /**
- * @param urlLike The URL to fetch. Can be a path or a full URL. Use path variables like "/api/:id".
+ * @param urlLike The URL to fetch. Can be a path or a full URL. Use path variables like _/api/:id_.
  */
 export function useXFetch<T = any>(
-    urlLike: string,
+    urlLike: string | Disabled,
     params: UseXFetchParams | Disabled,
     options?: UseXFetchOptions<T>
 ): UseXFetchResult<T> {
@@ -54,8 +54,8 @@ export function useXFetch<T = any>(
             .join(",");
     }, [params && params?.pathVariables]);
     const parsedPath = React.useMemo<string | null>(() => {
-        // control disabled by checking if params is falsy
-        if (!params) return null;
+        // control disabled by checking if params or urlLike is falsy
+        if (!params || !urlLike) return null;
         return params.pathVariables ? replacePathVariables(urlLike, params.pathVariables) : urlLike;
     }, [urlLike, pathVarsHash]);
 
@@ -96,10 +96,14 @@ export interface UseXMutationParams<B> {
 }
 
 export type UseXMutateResult<B, R> = {
-    del: (params: UseXMutationParams<B>, requestInit?: XRequestInit) => Promise<R>;
-    post: (params: UseXMutationParams<B>, requestInit?: XRequestInit) => Promise<R>;
-    put: (params: UseXMutationParams<B>, requestInit?: XRequestInit) => Promise<R>;
-    mutate: (method: string, params: UseXMutationParams<B>, requestInit?: XRequestInit) => Promise<R>;
+    del: (params: UseXMutationParams<B>, requestInit?: XRequestInit) => Promise<R | undefined>;
+    post: (params: UseXMutationParams<B>, requestInit?: XRequestInit) => Promise<R | undefined>;
+    put: (params: UseXMutationParams<B>, requestInit?: XRequestInit) => Promise<R | undefined>;
+    mutate: (
+        method: string,
+        params: UseXMutationParams<B>,
+        requestInit?: XRequestInit
+    ) => Promise<R | undefined>;
     error: FetchError | null;
     isSuccess: boolean;
     isMutating: boolean;
@@ -113,12 +117,11 @@ export type UseXMutationOptions<R> = {
     onError?: (error: FetchError) => void;
 };
 
-
 /**
- * @param urlLike The URL to fetch. Can be a path or a full URL. Use path variables like "/api/:id".
+ * @param urlLike The URL to fetch. Can be a path or a full URL. Use path variables like _/api/:id_.
  */
 export function useXMutation<B, R>(
-    urlLike: string,
+    urlLike: string | Disabled,
     options?: UseXMutationOptions<R>
 ): UseXMutateResult<B, R> {
     const [error, setError] = React.useState<FetchError | null>(null);
@@ -129,12 +132,20 @@ export function useXMutation<B, R>(
     const abortController = React.useRef<AbortController | null>(null);
 
     const mutate = React.useCallback(
-        (method: string, params: UseXMutationParams<B>, requestInit?: XRequestInit) => {
+        async (method: string, params: UseXMutationParams<B>, requestInit?: XRequestInit) => {
             if (abortController.current) {
                 abortController.current.abort();
             }
 
             const currentAbortController = (abortController.current = new AbortController());
+
+            if (!urlLike) {
+                setError(new FetchError(method, "Disabled", null, "useXMutation"));
+                setIsSuccess(false);
+                setIsMutating(false);
+                setData(undefined);
+                return undefined;
+            }
 
             setError(null);
             setIsSuccess(false);
