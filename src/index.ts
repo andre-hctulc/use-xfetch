@@ -36,10 +36,10 @@ export type UseXFetchOptions<T> = {
 };
 
 /**
- * Use path variables like this: _/api/project/:id_
+ * @param urlLike The URL to fetch. Can be a path or a full URL. Use path variables like "/api/:id".
  */
 export function useXFetch<T = any>(
-    path: string,
+    urlLike: string,
     params: UseXFetchParams | Disabled,
     options?: UseXFetchOptions<T>
 ): UseXFetchResult<T> {
@@ -56,8 +56,8 @@ export function useXFetch<T = any>(
     const parsedPath = React.useMemo<string | null>(() => {
         // control disabled by checking if params is falsy
         if (!params) return null;
-        return params.pathVariables ? replacePathVariables(path, params.pathVariables) : path;
-    }, [path, pathVarsHash]);
+        return params.pathVariables ? replacePathVariables(urlLike, params.pathVariables) : urlLike;
+    }, [urlLike, pathVarsHash]);
 
     const query = useSWR<T, FetchError>(params && parsedPath ? { ...params, path: parsedPath } : null, {
         fetcher: (fetcherParams: UseXFetchParams & { path: string }) => {
@@ -92,7 +92,7 @@ export function useXFetch<T = any>(
 export interface UseXMutationParams<B> {
     pathVariables?: Record<string, string>;
     queryParams?: Record<string, string>;
-    data?: B;
+    body?: B;
 }
 
 export type UseXMutateResult<B, R> = {
@@ -113,10 +113,14 @@ export type UseXMutationOptions<R> = {
     onError?: (error: FetchError) => void;
 };
 
+
 /**
- * Use path variables like this: _/api/project/:id_
+ * @param urlLike The URL to fetch. Can be a path or a full URL. Use path variables like "/api/:id".
  */
-export function useXMutation<B, R>(path: string, options?: UseXMutationOptions<R>): UseXMutateResult<B, R> {
+export function useXMutation<B, R>(
+    urlLike: string,
+    options?: UseXMutationOptions<R>
+): UseXMutateResult<B, R> {
     const [error, setError] = React.useState<FetchError | null>(null);
     const [isMutating, setIsMutating] = React.useState(false);
     const [isSuccess, setIsSuccess] = React.useState(false);
@@ -137,9 +141,11 @@ export function useXMutation<B, R>(path: string, options?: UseXMutationOptions<R
             setIsMutating(true);
             setData(undefined);
 
-            const parsedPath = params.pathVariables ? replacePathVariables(path, params.pathVariables) : path;
+            const parsedPath = params.pathVariables
+                ? replacePathVariables(urlLike, params.pathVariables)
+                : urlLike;
 
-            return xmutate<R, B>(method, parsedPath, params.data!, {
+            return xmutate<R, B>(method, parsedPath, params.body!, {
                 ...options?.requestInit,
                 ...requestInit,
             })
@@ -200,5 +206,10 @@ export function useXMutation<B, R>(path: string, options?: UseXMutationOptions<R
         };
     }, []);
 
-    return { del, post, put, mutate, error, isSuccess, isMutating, isError, data };
+    const mutation = React.useMemo(
+        () => ({ del, post, put, mutate, error, isSuccess, isMutating, isError, data }),
+        [del, post, put, mutate, error, isSuccess, isMutating, isError, data]
+    );
+
+    return mutation;
 }
