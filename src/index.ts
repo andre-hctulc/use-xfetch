@@ -3,12 +3,19 @@ import React from "react";
 import type { SWRConfiguration, SWRResponse } from "swr";
 import useSWR from "swr";
 
+/**
+ * Replaces path variables in the path with the values from the pathVariables object.
+ *
+ * Path variables are defined as `:variable`.
+ *
+ * If the value for a path variable is not found, the variable is left as a placeholder.
+ */
 const replacePathVariables = (path: string, pathVariables: Record<string, string>) => {
-    return path.replace(/\{([^}]+)\}/g, (_, key) => {
-        if (key in pathVariables) {
-            return pathVariables[key] + "";
-        }
-        return `{${key}}`;
+    return path.replace(/:([a-zA-Z0-9_]+)/g, (_, variable) => {
+        const value = pathVariables[variable];
+        // If the value is falsy, return the variable as a placeholder
+        if (!value) return `:${variable}`;
+        return value;
     });
 };
 
@@ -19,7 +26,7 @@ export interface UseXFetchParams {
 
 export type Disabled = null | false | undefined | "" | 0;
 
-export type XFetchResult<T> = SWRResponse<T, FetchError>;
+export type UseXFetchResult<T> = SWRResponse<T, FetchError>;
 
 export type UseXFetchOptions<T> = {
     requestInit?: XRequestInit;
@@ -29,19 +36,28 @@ export type UseXFetchOptions<T> = {
 };
 
 /**
- * Use path variables like this: _/api/project/{id}_
+ * Use path variables like this: _/api/project/:id_
  */
 export function useXFetch<T = any>(
     path: string,
     params: UseXFetchParams | Disabled,
     options?: UseXFetchOptions<T>
-): XFetchResult<T> {
+): UseXFetchResult<T> {
     const started = React.useRef(false);
+    /**
+     * Hash of the path variables object. Used to reduce the number of times the path is parsed.
+     */
+    const pathVarsHash = React.useMemo<string>(() => {
+        if (!params) return "";
+        return Object.entries(params?.pathVariables || {})
+            .map(([key, value]) => `${key}:${value}`)
+            .join(",");
+    }, [params && params?.pathVariables]);
     const parsedPath = React.useMemo<string | null>(() => {
         // control disabled by checking if params is falsy
         if (!params) return null;
         return params.pathVariables ? replacePathVariables(path, params.pathVariables) : path;
-    }, [path, !!params && params.pathVariables]);
+    }, [path, pathVarsHash]);
 
     const query = useSWR<T, FetchError>(params && parsedPath ? { ...params, path: parsedPath } : null, {
         fetcher: (fetcherParams: UseXFetchParams & { path: string }) => {
@@ -79,7 +95,7 @@ export interface UseXMutationParams<B> {
     data?: B;
 }
 
-export type XMutateResult<B, R> = {
+export type UseXMutateResult<B, R> = {
     del: (params: UseXMutationParams<B>, requestInit?: XRequestInit) => Promise<R>;
     post: (params: UseXMutationParams<B>, requestInit?: XRequestInit) => Promise<R>;
     put: (params: UseXMutationParams<B>, requestInit?: XRequestInit) => Promise<R>;
@@ -98,9 +114,9 @@ export type UseXMutationOptions<R> = {
 };
 
 /**
- * Use path variables like this: _/api/project/{id}_
+ * Use path variables like this: _/api/project/:id_
  */
-export function useXMutation<B, R>(path: string, options?: UseXMutationOptions<R>): XMutateResult<B, R> {
+export function useXMutation<B, R>(path: string, options?: UseXMutationOptions<R>): UseXMutateResult<B, R> {
     const [error, setError] = React.useState<FetchError | null>(null);
     const [isMutating, setIsMutating] = React.useState(false);
     const [isSuccess, setIsSuccess] = React.useState(false);
