@@ -40,7 +40,7 @@ export type UseXFetchOptions<T> = {
  */
 export function useXFetch<T = any>(
     urlLike: string | Disabled,
-    params: UseXFetchParams | Disabled,
+    params?: UseXFetchParams | Disabled,
     options?: UseXFetchOptions<T>
 ): UseXFetchResult<T> {
     const started = React.useRef(false);
@@ -181,7 +181,7 @@ export function useXMutation<B, R>(
                     if (!currentAbortController.signal.aborted) setIsMutating(false);
                 });
         },
-        []
+        [urlLike]
     );
     const del = React.useCallback(
         (params: UseXMutationParams<B>, requestInit?: XRequestInit) => mutate("DELETE", params, requestInit),
