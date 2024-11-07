@@ -14,14 +14,18 @@ const replacePathVariables = (path: string, pathVariables: Record<string, string
     return path.replace(/:([a-zA-Z0-9_]+)/g, (_, variable) => {
         const value = pathVariables[variable];
         // If the value is falsy, return the variable as a placeholder
-        if (!value) return `:${variable}`;
-        return value;
+        if (value === undefined) return `:${variable}`;
+        // stringify the value
+        return value + "";
     });
 };
 
 export interface UseXFetchParams {
-    queryParams?: Record<string, string>;
-    pathVariables?: Record<string, string>;
+    /**
+     * Undefined values will be ignored.
+     */
+    queryParams?: Record<string, any>;
+    pathVariables?: Record<string, any>;
 }
 
 export type Disabled = null | false | undefined | "" | 0;

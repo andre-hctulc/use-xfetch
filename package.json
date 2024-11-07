@@ -21,7 +21,7 @@
         "url": "https://github.com/andre-hctulc/use-xfetch.git"
     },
     "dependencies": {
-        "@andre-hctulc/xfetch": "^1.0.8",
+        "@andre-hctulc/xfetch": "^1.0.9",
         "swr": "^2.2.5"
     }
 }
