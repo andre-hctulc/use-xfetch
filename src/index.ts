@@ -22,9 +22,12 @@ const replacePathVariables = (path: string, pathVariables: Record<string, string
 
 export interface UseXFetchParams {
     /**
-     * Undefined values will be ignored.
+     * Undefined values will be ignored. All other values will be stringified.
      */
     queryParams?: Record<string, any>;
+    /**
+     * Path variables to replace in the URL. The values are stringified.
+     */
     pathVariables?: Record<string, any>;
 }
 
@@ -115,9 +118,11 @@ export type UseXMutateResult<B, R> = {
     data: R | undefined;
 };
 
+type SuccessData<R> = Exclude<R, undefined> extends never ? undefined : Exclude<R, undefined>;
+
 export type UseXMutationOptions<R> = {
     requestInit?: XRequestInit;
-    onSuccess?: (data: R) => void;
+    onSuccess?: (data: SuccessData<R>) => void;
     onError?: (error: FetchError) => void;
 };
 
@@ -202,7 +207,7 @@ export function useXMutation<B, R>(
 
     React.useEffect(() => {
         if (isSuccess && options?.onSuccess) {
-            options.onSuccess(data!);
+            options.onSuccess(data as SuccessData<R>);
         }
     }, [isSuccess]);
 
