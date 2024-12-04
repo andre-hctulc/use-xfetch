@@ -7,6 +7,7 @@ import useSWR from "swr";
 import { useXFetchContext } from "./context.js";
 
 /* 
+NOTE
 "use client" is required!
 */
 
@@ -88,8 +89,8 @@ export function useXFetch<R = any, Q extends Params = Params, P extends Params =
                 ...ctx.fetchesRequestInit,
                 ...options?.requestInit,
                 queryParams: {
-                    ...ctx.requestInit,
-                    ...ctx.fetchesRequestInit,
+                    ...ctx.requestInit.queryParams,
+                    ...ctx.fetchesRequestInit.queryParams,
                     ...options?.requestInit?.queryParams,
                     ...fetcherParams.queryParams,
                 },
