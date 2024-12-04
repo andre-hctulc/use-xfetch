@@ -83,7 +83,7 @@ export function useXFetch<R = any, Q extends Params = Params, P extends Params =
     }, [urlLike, pathVarsHash]);
 
     const query = useSWR<R, FetchError>(params && parsedPath ? { path: parsedPath, params } : null, {
-        fetcher: (fetcherParams: UseXFetchParams & { path: string }) => {
+        fetcher: (fetcherParams: { path: string; params: UseXFetchParams }) => {
             return xfetch<R>(fetcherParams.path, {
                 ...ctx.requestInit,
                 ...ctx.fetchesRequestInit,
@@ -92,7 +92,7 @@ export function useXFetch<R = any, Q extends Params = Params, P extends Params =
                     ...ctx.requestInit.queryParams,
                     ...ctx.fetchesRequestInit.queryParams,
                     ...options?.requestInit?.queryParams,
-                    ...fetcherParams.queryParams,
+                    ...fetcherParams.params?.queryParams,
                 },
             });
         },
