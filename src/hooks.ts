@@ -169,6 +169,7 @@ export function useXMutation<B = any, R = any, Q extends Params = Params, P exte
     urlLike: string | Disabled,
     options?: UseXMutationOptions<R>
 ): UseXMutateResult<B, R, Q, P> {
+    const ctx = useXFetchContext();
     const [error, setError] = React.useState<FetchError | null>(null);
     const [isMutating, setIsMutating] = React.useState(false);
     const [isSuccess, setIsSuccess] = React.useState(false);
@@ -202,6 +203,8 @@ export function useXMutation<B = any, R = any, Q extends Params = Params, P exte
                 : urlLike;
 
             return xmutate<R, B>(method, parsedPath, params.body!, {
+                ...ctx.requestInit,
+                ...ctx.mutationsRequestInit,
                 ...options?.requestInit,
                 ...requestInit,
             })

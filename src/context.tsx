@@ -1,3 +1,5 @@
+"use client";
+
 import { XRequestInit } from "@andre-hctulc/xfetch";
 import React from "react";
 
@@ -9,10 +11,10 @@ interface XFetchContext {
 
 const XFetchContext = React.createContext<XFetchContext | undefined>(undefined);
 
-export function useXFetchContext() {
+export function useXFetchContext(): XFetchContext {
     const context = React.useContext(XFetchContext);
     if (!context) {
-        throw new Error("useXFetchContext must be used within a UseXFetchProvider");
+        return { requestInit: {}, mutationsRequestInit: {}, fetchesRequestInit: {} };
     }
     return context;
 }
