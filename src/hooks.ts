@@ -2,7 +2,7 @@ import { FetchError, xfetch, xmutate, type XRequestInit } from "@andre-hctulc/xf
 import React from "react";
 import type { SWRConfiguration, SWRResponse } from "swr";
 import useSWR from "swr";
-import { useXFetchContext } from "./context";
+import { useXFetchContext } from "./context.js";
 
 /**
  * Replaces path variables in the path with the values from the pathVariables object.
