@@ -43,21 +43,11 @@ export function useXFetch<R = any, Q extends Params = Params, P extends Params =
     const ctx = useXContext();
     const started = React.useRef(false);
 
-    /**
-     * Hash of the path variables object. Used to reduce the number of times the path is parsed.
-     */
-    const pathVarsHash = React.useMemo<string>(() => {
-        if (!params) return "";
-        return Object.entries(params?.pathVariables || {})
-            .map(([key, value]) => `${key}:${value}`)
-            .join(",");
-    }, [params && params?.pathVariables]);
-
     const parsedPath = React.useMemo<string | null>(() => {
         // control disabled by checking if params or urlLike is falsy
         if (!params || !urlLike || options?.disabled) return null;
         return params.pathVariables ? replacePathVariables(urlLike, params.pathVariables) : urlLike;
-    }, [urlLike, pathVarsHash]);
+    }, [urlLike, params && params.pathVariables]);
 
     const key: null | FetcherParams =
         params && parsedPath ? { path: parsedPath, queryParams: params.queryParams } : null;
