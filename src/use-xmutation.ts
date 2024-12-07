@@ -3,7 +3,7 @@
 import { XRequestInit, XFetchError, xmutate } from "@andre-hctulc/xfetch";
 import React from "react";
 import { useXContext } from "./xcontext.js";
-import { Disabled, Params, replacePathVariables } from "./helpers.js";
+import { Disabled, mergeRequestInits, Params, replacePathVariables } from "./helpers.js";
 
 export interface UseXMutationParams<B = any, Q extends Params = Params, P extends Params = Params> {
     pathVariables?: P;
@@ -45,10 +45,17 @@ export type UseXMutateResult<B = any, R = any, Q extends Params = Params, P exte
 type SuccessData<R> = Exclude<R, undefined> extends never ? undefined : Exclude<R, undefined>;
 
 export type UseXMutationOptions<R = any> = {
+    /**
+     * Static path variables. These are overwritten by the path variables in the params.
+     */
     pathVariables?: Params;
     requestInit?: XRequestInit;
     onSuccess?: (data: SuccessData<R>) => void;
     onError?: (error: XFetchError) => void;
+    /**
+     * Ignores the fetch options of the `XContext`
+     */
+    ignoreContext?: boolean;
 };
 
 /**
@@ -96,12 +103,17 @@ export function useXMutation<B = any, R = any, Q extends Params = Params, P exte
                 ? replacePathVariables(urlLike, { ...options?.pathVariables, ...params.pathVariables })
                 : urlLike;
 
-        return xmutate<R, B>(method, parsedPath, params.body!, {
-            ...ctx.requestInit,
-            ...ctx.mutationsRequestInit,
-            ...options?.requestInit,
-            ...requestInit,
-        })
+        return xmutate<R, B>(
+            method,
+            parsedPath,
+            params.body!,
+            mergeRequestInits(
+                options?.ignoreContext ? {} : ctx.requestInit,
+                options?.ignoreContext ? {} : ctx.mutationsRequestInit,
+                options?.requestInit || {},
+                requestInit || {}
+            )
+        )
             .then((responseData) => {
                 if (!currentAbortController.signal.aborted) {
                     setIsSuccess(true);

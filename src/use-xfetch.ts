@@ -26,6 +26,10 @@ export type UseXFetchOptions<R = any> = {
     onError?: (error: XFetchError) => void;
     onSuccess?: (data: R | undefined) => void;
     disabled?: boolean;
+    /**
+     * Ignores the fetch options of the `XContext`
+     */
+    ignoreContext?: boolean;
 };
 
 /**
@@ -53,7 +57,11 @@ export function useXFetch<R = any, Q extends Params = Params, P extends Params =
         params && parsedPath ? { path: parsedPath, queryParams: params.queryParams } : null;
 
     const query = useSWR<R, XFetchError>(key, {
-        fetcher: createFetcher<R>(ctx.requestInit, ctx.fetchesRequestInit, options?.requestInit || {}),
+        fetcher: createFetcher<R>(
+            options?.ignoreContext ? {} : ctx.requestInit,
+            options?.ignoreContext ? {} : ctx.fetchesRequestInit,
+            options?.requestInit || {}
+        ),
         ...options?.swr,
     });
 
