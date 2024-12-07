@@ -1,6 +1,6 @@
 "use client";
 
-import { FetchError, XRequestInit, xfetch } from "@andre-hctulc/xfetch";
+import { XFetchError, XRequestInit } from "@andre-hctulc/xfetch";
 import React from "react";
 import useSWR, { SWRResponse, SWRConfiguration } from "swr";
 import { useXContext } from "./xcontext.js";
@@ -18,12 +18,12 @@ export interface UseXFetchParams<Q extends Params = Params, P extends Params = P
     pathVariables?: P;
 }
 
-export type UseXFetchResult<R = any> = SWRResponse<R, FetchError>;
+export type UseXFetchResult<R = any> = SWRResponse<R, XFetchError>;
 
 export type UseXFetchOptions<R = any> = {
     requestInit?: XRequestInit;
-    swr?: SWRConfiguration<R, FetchError>;
-    onError?: (error: FetchError) => void;
+    swr?: SWRConfiguration<R, XFetchError>;
+    onError?: (error: XFetchError) => void;
     onSuccess?: (data: R | undefined) => void;
     disabled?: boolean;
 };
@@ -62,7 +62,7 @@ export function useXFetch<R = any, Q extends Params = Params, P extends Params =
     const key: null | FetcherParams =
         params && parsedPath ? { path: parsedPath, queryParams: params.queryParams } : null;
 
-    const query = useSWR<R, FetchError>(key, {
+    const query = useSWR<R, XFetchError>(key, {
         fetcher: createFetcher<R>(ctx.requestInit, ctx.fetchesRequestInit, options?.requestInit || {}),
         ...options?.swr,
     });

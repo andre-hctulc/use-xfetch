@@ -1,6 +1,6 @@
 "use client";
 
-import { FetchError, XRequestInit } from "@andre-hctulc/xfetch";
+import { XFetchError, XRequestInit } from "@andre-hctulc/xfetch";
 import React from "react";
 import { useXContext } from "./xcontext.js";
 import { Disabled, Params, replacePathVariables } from "./helpers.js";
@@ -18,12 +18,12 @@ export interface UseXInfiniteParams<R = any, Q extends Params = Params, P extend
     pathVariables?: P;
 }
 
-export type UseXInfiniteResult<R = any> = SWRInfiniteResponse<R, FetchError>;
+export type UseXInfiniteResult<R = any> = SWRInfiniteResponse<R, XFetchError>;
 
 export type UseXInfiniteOptions<R = any> = {
     requestInit?: XRequestInit;
-    swr?: SWRInfiniteConfiguration<R, FetchError>;
-    onError?: (error: FetchError) => void;
+    swr?: SWRInfiniteConfiguration<R, XFetchError>;
+    onError?: (error: XFetchError) => void;
     onSuccess?: (data: R[] | undefined) => void;
     disabled?: boolean;
 };
@@ -59,7 +59,7 @@ export function useXInfinite<R = any, Q extends Params = Params, P extends Param
         return params.pathVariables ? replacePathVariables(urlLike, params.pathVariables) : urlLike;
     }, [urlLike, pathVarsHash]);
 
-    const infinite = useSWRInfinite<R, FetchError>(
+    const infinite = useSWRInfinite<R, XFetchError>(
         (index, previousData) => {
             if (!params || !parsedPath) return null;
 

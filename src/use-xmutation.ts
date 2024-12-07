@@ -1,6 +1,6 @@
 "use client";
 
-import { XRequestInit, FetchError, xmutate } from "@andre-hctulc/xfetch";
+import { XRequestInit, XFetchError, xmutate } from "@andre-hctulc/xfetch";
 import React from "react";
 import { useXContext } from "./xcontext.js";
 import { Disabled, Params, replacePathVariables } from "./helpers.js";
@@ -35,7 +35,7 @@ export type UseXMutateResult<B = any, R = any, Q extends Params = Params, P exte
         params: UseXMutationParams<B, Q, P>,
         requestInit?: XRequestInit
     ) => Promise<{ data: R } | undefined>;
-    error: FetchError | null;
+    error: XFetchError | null;
     isSuccess: boolean;
     isMutating: boolean;
     isError: boolean;
@@ -47,7 +47,7 @@ type SuccessData<R> = Exclude<R, undefined> extends never ? undefined : Exclude<
 export type UseXMutationOptions<R = any> = {
     requestInit?: XRequestInit;
     onSuccess?: (data: SuccessData<R>) => void;
-    onError?: (error: FetchError) => void;
+    onError?: (error: XFetchError) => void;
 };
 
 /**
@@ -63,7 +63,7 @@ export function useXMutation<B = any, R = any, Q extends Params = Params, P exte
     options?: UseXMutationOptions<R>
 ): UseXMutateResult<B, R, Q, P> {
     const ctx = useXContext();
-    const [error, setError] = React.useState<FetchError | null>(null);
+    const [error, setError] = React.useState<XFetchError | null>(null);
     const [isMutating, setIsMutating] = React.useState(false);
     const [isSuccess, setIsSuccess] = React.useState(false);
     const [data, setData] = React.useState<R | undefined>(undefined);
@@ -79,7 +79,7 @@ export function useXMutation<B = any, R = any, Q extends Params = Params, P exte
             const currentAbortController = (abortController.current = new AbortController());
 
             if (!urlLike) {
-                setError(new FetchError(method, "Disabled", null, "useXMutation"));
+                setError(new XFetchError(method, "Disabled", null, "useXMutation"));
                 setIsSuccess(false);
                 setIsMutating(false);
                 setData(undefined);
