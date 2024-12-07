@@ -3,47 +3,51 @@
 import { XRequestInit } from "@andre-hctulc/xfetch";
 import React from "react";
 
-interface XFetchContext {
+export interface XContext {
     requestInit: Partial<XRequestInit>;
     mutationsRequestInit: Partial<XRequestInit>;
     fetchesRequestInit: Partial<XRequestInit>;
+    infiniteRequestInit: Partial<XRequestInit>;
 }
 
-const XFetchContext = React.createContext<XFetchContext | undefined>(undefined);
+const XContext = React.createContext<XContext | undefined>(undefined);
 
-export function useXFetchContext(): XFetchContext {
-    const context = React.useContext(XFetchContext);
+export function useXContext(): XContext {
+    const context = React.useContext(XContext);
     if (!context) {
-        return { requestInit: {}, mutationsRequestInit: {}, fetchesRequestInit: {} };
+        return { requestInit: {}, mutationsRequestInit: {}, fetchesRequestInit: {}, infiniteRequestInit: {} };
     }
     return context;
 }
 
-export interface XFetchProviderProps {
+export interface XProviderProps {
     children?: React.ReactNode;
     requestInit?: Partial<XRequestInit>;
     mutationsRequestInit?: Partial<XRequestInit>;
     fetchesRequestInit?: Partial<XRequestInit>;
+    infiniteRequestInit?: Partial<XRequestInit>;
 }
 
 /**
  * Lets you configure the default requestInit useXFetch hooks in the component tree.
  */
-export function XFetchProvider({
+export function XProvider({
     children,
     requestInit,
     mutationsRequestInit,
     fetchesRequestInit,
-}: XFetchProviderProps) {
+    infiniteRequestInit,
+}: XProviderProps) {
     return (
-        <XFetchContext.Provider
+        <XContext.Provider
             value={{
                 requestInit: requestInit || {},
                 mutationsRequestInit: mutationsRequestInit || {},
                 fetchesRequestInit: fetchesRequestInit || {},
+                infiniteRequestInit: infiniteRequestInit || {},
             }}
         >
             {children}
-        </XFetchContext.Provider>
+        </XContext.Provider>
     );
 }
