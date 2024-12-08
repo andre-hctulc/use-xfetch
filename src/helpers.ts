@@ -48,9 +48,14 @@ export function mergeRequestInits(...objs: XRequestInit[]) {
                 if (value instanceof URLSearchParams) {
                     value.forEach((paramVal, paramName) => searchParams.set(paramName, paramVal));
                 } else if (value) {
-                    Object.entries(value).forEach(([paramName, paramVal]) =>
-                        searchParams.set(paramName, paramVal as any)
-                    );
+                    Object.entries(value).forEach(([paramName, paramVal]) => {
+                        if (Array.isArray(paramVal)) {
+                            searchParams.delete(paramName);
+                            paramVal.forEach((paramVal) => searchParams.append(paramName, paramVal as any));
+                        } else {
+                            searchParams.set(paramName, paramVal as any);
+                        }
+                    });
                 }
             }
             // merge the rest

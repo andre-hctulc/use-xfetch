@@ -78,72 +78,81 @@ export function useXMutation<B = any, R = any, Q extends Params = Params, P exte
     const isError = error !== null;
     const abortController = React.useRef<AbortController | null>(null);
 
-    const mutate = async (method: string, params: UseXMutationParams<B>, requestInit?: XRequestInit) => {
-        if (abortController.current) {
-            abortController.current.abort();
-        }
+    const mutate = React.useCallback(
+        async (method: string, params: UseXMutationParams<B>, requestInit?: XRequestInit) => {
+            if (abortController.current) {
+                abortController.current.abort();
+            }
 
-        const currentAbortController = (abortController.current = new AbortController());
+            const currentAbortController = (abortController.current = new AbortController());
 
-        if (!urlLike) {
-            setError(new XFetchError(method, "Disabled", null, "useXMutation"));
+            if (!urlLike) {
+                setError(new XFetchError(method, "Disabled", null, "useXMutation"));
+                setIsSuccess(false);
+                setIsMutating(false);
+                setData(undefined);
+                return undefined;
+            }
+
+            setError(null);
             setIsSuccess(false);
-            setIsMutating(false);
+            setIsMutating(true);
             setData(undefined);
-            return undefined;
-        }
 
-        setError(null);
-        setIsSuccess(false);
-        setIsMutating(true);
-        setData(undefined);
+            const parsedPath =
+                params.pathVariables || options?.pathVariables
+                    ? replacePathVariables(urlLike, { ...options?.pathVariables, ...params.pathVariables })
+                    : urlLike;
 
-        const parsedPath =
-            params.pathVariables || options?.pathVariables
-                ? replacePathVariables(urlLike, { ...options?.pathVariables, ...params.pathVariables })
-                : urlLike;
-
-        return xmutate<R, B>(
-            method,
-            parsedPath,
-            params.body!,
-            mergeRequestInits(
-                options?.ignoreContext ? {} : ctx.requestInit,
-                options?.ignoreContext ? {} : ctx.mutationsRequestInit,
-                options?.requestInit || {},
-                requestInit || {}
+            return xmutate<R, B>(
+                method,
+                parsedPath,
+                params.body!,
+                mergeRequestInits(
+                    options?.ignoreContext ? {} : ctx.requestInit,
+                    options?.ignoreContext ? {} : ctx.mutationsRequestInit,
+                    options?.requestInit || {},
+                    requestInit || {}
+                )
             )
-        )
-            .then((responseData) => {
-                if (!currentAbortController.signal.aborted) {
-                    setIsSuccess(true);
-                    setError(null);
-                    setData(responseData);
-                }
+                .then((responseData) => {
+                    if (!currentAbortController.signal.aborted) {
+                        setIsSuccess(true);
+                        setError(null);
+                        setData(responseData);
+                    }
 
-                return { data: responseData };
-            })
-            .catch((err) => {
-                if (!currentAbortController.signal.aborted) {
-                    setError(err);
-                    setIsSuccess(false);
-                    setData(undefined);
-                }
-                throw err;
-            })
-            .finally(() => {
-                if (!currentAbortController.signal.aborted) setIsMutating(false);
-            });
-    };
+                    return { data: responseData };
+                })
+                .catch((err) => {
+                    if (!currentAbortController.signal.aborted) {
+                        setError(err);
+                        setIsSuccess(false);
+                        setData(undefined);
+                    }
+                    throw err;
+                })
+                .finally(() => {
+                    if (!currentAbortController.signal.aborted) setIsMutating(false);
+                });
+        },
+        [urlLike, options, ctx]
+    );
 
-    const del = (params: UseXMutationParams<B>, requestInit?: XRequestInit) =>
-        mutate("DELETE", params, requestInit);
+    const del = React.useCallback(
+        (params: UseXMutationParams<B>, requestInit?: XRequestInit) => mutate("DELETE", params, requestInit),
+        [mutate]
+    );
 
-    const post = (params: UseXMutationParams<B>, requestInit?: XRequestInit) =>
-        mutate("POST", params, requestInit);
+    const post = React.useCallback(
+        (params: UseXMutationParams<B>, requestInit?: XRequestInit) => mutate("POST", params, requestInit),
+        [mutate]
+    );
 
-    const put = (params: UseXMutationParams<B>, requestInit?: XRequestInit) =>
-        mutate("PUT", params, requestInit);
+    const put = React.useCallback(
+        (params: UseXMutationParams<B>, requestInit?: XRequestInit) => mutate("PUT", params, requestInit),
+        [mutate]
+    );
 
     React.useEffect(() => {
         if (isSuccess && options?.onSuccess) {
