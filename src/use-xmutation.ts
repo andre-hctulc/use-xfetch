@@ -166,15 +166,6 @@ export function useXMutation<B = any, R = any, Q extends Params = Params, P exte
         }
     }, [error]);
 
-    // Cleanup
-    React.useEffect(() => {
-        return () => {
-            if (abortController.current) {
-                abortController.current.abort();
-            }
-        };
-    }, []);
-
     const mutation = React.useMemo(
         () => ({ del, post, put, mutate, error, isSuccess, isMutating, isError, data }),
         [del, post, put, mutate, error, isSuccess, isMutating, isError, data]
