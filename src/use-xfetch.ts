@@ -3,7 +3,7 @@
 import { XFetchError, XRequestInit } from "@andre-hctulc/xfetch";
 import React from "react";
 import useSWR, { SWRResponse, SWRConfiguration } from "swr";
-import { useXContext } from "./xcontext.js";
+import { useXContext, XContext } from "./xcontext.js";
 import { Disabled, Params, replacePathVariables } from "./helpers.js";
 import { createFetcher, FetcherParams } from "./fetcher.js";
 
@@ -27,7 +27,7 @@ export type UseXFetchOptions<R = any> = {
     onSuccess?: (data: R | undefined) => void;
     disabled?: boolean;
     /**
-     * Ignores the fetch options of the `XContext`
+     * Ignores the fetch options of the {@link XContext}
      */
     ignoreContext?: boolean;
 };

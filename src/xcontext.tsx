@@ -2,6 +2,7 @@
 
 import { XRequestInit } from "@andre-hctulc/xfetch";
 import React from "react";
+import { SWRConfig, SWRConfiguration } from "swr";
 
 export interface XContext {
     requestInit: Partial<XRequestInit>;
@@ -26,6 +27,7 @@ export interface XProviderProps {
     mutationsRequestInit?: Partial<XRequestInit>;
     fetchesRequestInit?: Partial<XRequestInit>;
     infiniteRequestInit?: Partial<XRequestInit>;
+    swrConfig?: SWRConfiguration;
 }
 
 /**
@@ -37,8 +39,9 @@ export function XProvider({
     mutationsRequestInit,
     fetchesRequestInit,
     infiniteRequestInit,
+    swrConfig,
 }: XProviderProps) {
-    return (
+    const prov = (
         <XContext.Provider
             value={{
                 requestInit: requestInit || {},
@@ -50,4 +53,10 @@ export function XProvider({
             {children}
         </XContext.Provider>
     );
+
+    if (swrConfig) {
+        return <SWRConfig value={swrConfig}>{prov}</SWRConfig>;
+    }
+
+    return prov;
 }

@@ -2,7 +2,7 @@
 
 import { XRequestInit, XFetchError, xmutate } from "@andre-hctulc/xfetch";
 import React from "react";
-import { useXContext } from "./xcontext.js";
+import { useXContext, XContext } from "./xcontext.js";
 import { Disabled, mergeRequestInits, Params, replacePathVariables } from "./helpers.js";
 
 export interface UseXMutationParams<B = any, Q extends Params = Params, P extends Params = Params> {
@@ -53,7 +53,7 @@ export type UseXMutationOptions<R = any> = {
     onSuccess?: (data: SuccessData<R>) => void;
     onError?: (error: XFetchError) => void;
     /**
-     * Ignores the fetch options of the `XContext`
+     * Ignores the fetch options of the {@link XContext}
      */
     ignoreContext?: boolean;
 };

@@ -2,7 +2,7 @@
 
 import { XFetchError, XRequestInit } from "@andre-hctulc/xfetch";
 import React from "react";
-import { useXContext } from "./xcontext.js";
+import { useXContext, XContext } from "./xcontext.js";
 import { Disabled, Params, replacePathVariables } from "./helpers.js";
 import useSWRInfinite, { SWRInfiniteConfiguration, SWRInfiniteResponse } from "swr/infinite";
 import { createFetcher, FetcherParams } from "./fetcher.js";
@@ -27,7 +27,7 @@ export type UseXInfiniteOptions<R = any> = {
     onSuccess?: (data: R[] | undefined) => void;
     disabled?: boolean;
     /**
-     * Ignores the fetch options of the `XContext`
+     * Ignores the fetch options of the {@link XContext}
      */
     ignoreContext?: boolean;
 };
