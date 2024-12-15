@@ -3,7 +3,7 @@
 import { XRequestInit, XFetchError, xmutate } from "@andre-hctulc/xfetch";
 import React from "react";
 import { useXContext, XContext } from "./xcontext.js";
-import { Disabled, mergeRequestInits, Params, replacePathVariables } from "./helpers.js";
+import { Disabled, mergeRequestInit, Params, replacePathVariables } from "./helpers.js";
 
 export interface UseXMutationParams<B = any, Q extends Params = Params, P extends Params = Params> {
     pathVariables?: P;
@@ -108,7 +108,7 @@ export function useXMutation<B = any, R = any, Q extends Params = Params, P exte
                 method,
                 parsedPath,
                 params.body!,
-                mergeRequestInits(
+                mergeRequestInit(
                     options?.ignoreContext ? {} : ctx.requestInit,
                     options?.ignoreContext ? {} : ctx.mutationsRequestInit,
                     options?.requestInit || {},

@@ -24,7 +24,7 @@ export type Disabled = null | false | undefined | "" | 0;
 /**
  * Merges multiple request init objects. Latter request inits take precedence over the former ones.
  */
-export function mergeRequestInits(...objs: XRequestInit[]) {
+export function mergeRequestInit(...objs: XRequestInit[]) {
     const result: XRequestInit = {};
     const headers: Headers = new Headers();
     const searchParams: URLSearchParams = new URLSearchParams();

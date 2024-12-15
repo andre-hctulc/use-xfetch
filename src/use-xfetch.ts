@@ -4,7 +4,7 @@ import { XFetchError, XRequestInit } from "@andre-hctulc/xfetch";
 import React from "react";
 import useSWR, { SWRResponse, SWRConfiguration } from "swr";
 import { useXContext, XContext } from "./xcontext.js";
-import { Disabled, Params, replacePathVariables } from "./helpers.js";
+import { Disabled, mergeRequestInit, Params, replacePathVariables } from "./helpers.js";
 import { createFetcher, FetcherParams } from "./fetcher.js";
 
 export interface UseXFetchParams<Q extends Params = Params, P extends Params = Params> {
@@ -41,11 +41,16 @@ export type UseXFetchOptions<R = any> = {
  */
 export function useXFetch<R = any, Q extends Params = Params, P extends Params = Params>(
     urlLike: string | Disabled,
-    params?: UseXFetchParams<Q, P> | Disabled,
+    params: UseXFetchParams<Q, P> | Disabled,
     options?: UseXFetchOptions<R>
 ): UseXFetchResult<R> {
     const ctx = useXContext();
     const started = React.useRef(false);
+    const requestInit = mergeRequestInit(
+        options?.ignoreContext ? {} : ctx.requestInit,
+        options?.ignoreContext ? {} : ctx.fetchesRequestInit,
+        options?.requestInit || {}
+    );
 
     const parsedPath = React.useMemo<string | null>(() => {
         // control disabled by checking if params or urlLike is falsy
@@ -54,14 +59,12 @@ export function useXFetch<R = any, Q extends Params = Params, P extends Params =
     }, [urlLike, params && params.pathVariables]);
 
     const key: null | FetcherParams =
-        params && parsedPath ? { path: parsedPath, queryParams: params.queryParams } : null;
+        params && parsedPath
+            ? { path: parsedPath, queryParams: params.queryParams, body: requestInit.body }
+            : null;
 
     const query = useSWR<R, XFetchError>(key, {
-        fetcher: createFetcher<R>(
-            options?.ignoreContext ? {} : ctx.requestInit,
-            options?.ignoreContext ? {} : ctx.fetchesRequestInit,
-            options?.requestInit || {}
-        ),
+        fetcher: createFetcher<R>(requestInit),
         ...options?.swr,
     });
 

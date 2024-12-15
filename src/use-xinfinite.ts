@@ -3,7 +3,7 @@
 import { XFetchError, XRequestInit } from "@andre-hctulc/xfetch";
 import React from "react";
 import { useXContext, XContext } from "./xcontext.js";
-import { Disabled, Params, replacePathVariables } from "./helpers.js";
+import { Disabled, mergeRequestInit, Params, replacePathVariables } from "./helpers.js";
 import useSWRInfinite, { SWRInfiniteConfiguration, SWRInfiniteResponse } from "swr/infinite";
 import { createFetcher, FetcherParams } from "./fetcher.js";
 
@@ -46,6 +46,11 @@ export function useXInfinite<R = any, Q extends Params = Params, P extends Param
 ): UseXInfiniteResult<R> {
     const ctx = useXContext();
     const started = React.useRef(false);
+    const requestInit = mergeRequestInit(
+        options?.ignoreContext ? {} : ctx.requestInit,
+        options?.ignoreContext ? {} : ctx.infiniteRequestInit,
+        options?.requestInit || {}
+    );
 
     const parsedPath = React.useMemo<string | null>(() => {
         // control disabled by checking if params or urlLike is falsy
@@ -65,16 +70,13 @@ export function useXInfinite<R = any, Q extends Params = Params, P extends Param
                         : params.queryParams,
                 index,
                 infinite: true,
+                body: requestInit.body,
             };
 
             return fetcherParams;
         },
         {
-            fetcher: createFetcher<R>(
-                options?.ignoreContext ? {} : ctx.requestInit,
-                options?.ignoreContext ? {} : ctx.infiniteRequestInit,
-                options?.requestInit || {}
-            ),
+            fetcher: createFetcher<R>(requestInit),
             ...options?.swr,
         }
     );

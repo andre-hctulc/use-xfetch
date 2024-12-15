@@ -1,5 +1,5 @@
 import { xfetch, XRequestInit } from "@andre-hctulc/xfetch";
-import { mergeRequestInits, Params } from "./helpers.js";
+import { mergeRequestInit, Params } from "./helpers.js";
 
 export interface FetcherParams {
     /**
@@ -10,12 +10,13 @@ export interface FetcherParams {
      * Path variables to replace in the URL. The values are stringified.
      */
     path: string;
+    body: any;
 }
 
 /**
  * Latter request inits take precedence over the former ones.
  */
-export function createFetcher<R>(...requestInit: XRequestInit[]): (params: FetcherParams) => Promise<R> {
+export function createFetcher<R>(requestInit: XRequestInit): (params: FetcherParams) => Promise<R> {
     return ({ path, queryParams }: FetcherParams) =>
-        xfetch<R>(path, mergeRequestInits(...requestInit, { queryParams } as XRequestInit));
+        xfetch<R>(path, mergeRequestInit(requestInit, { queryParams }));
 }
