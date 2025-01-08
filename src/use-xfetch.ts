@@ -30,6 +30,10 @@ export type UseXFetchOptions<R = any> = {
      * Ignores the fetch options of the {@link XContext}
      */
     ignoreContext?: boolean;
+    /**
+     * Use this key in the swr key instead of the whole body
+     */
+    bodyKey?: any;
 };
 
 /**
@@ -60,7 +64,11 @@ export function useXFetch<R = any, Q extends Params = Params, P extends Params =
 
     const key: null | FetcherParams =
         params && parsedPath
-            ? { path: parsedPath, queryParams: params.queryParams, body: requestInit.body }
+            ? {
+                  path: parsedPath,
+                  queryParams: params.queryParams,
+                  body: options?.bodyKey ?? requestInit.body,
+              }
             : null;
 
     const query = useSWR<R, XFetchError>(key, {

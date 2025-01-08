@@ -30,6 +30,11 @@ export type UseXInfiniteOptions<R = any> = {
      * Ignores the fetch options of the {@link XContext}
      */
     ignoreContext?: boolean;
+
+    /**
+     * Use this key in the swr key instead of the whole body
+     */
+    bodyKey?: (pageIndex: number) => any;
 };
 
 /**
@@ -70,7 +75,7 @@ export function useXInfinite<R = any, Q extends Params = Params, P extends Param
                         : params.queryParams,
                 index,
                 infinite: true,
-                body: requestInit.body,
+                body: options?.bodyKey ? options.bodyKey(index) : requestInit.body,
             };
 
             return fetcherParams;
