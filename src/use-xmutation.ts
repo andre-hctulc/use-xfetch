@@ -52,6 +52,7 @@ export type UseXMutationOptions<R = any> = {
     requestInit?: XRequestInit;
     onSuccess?: (data: SuccessData<R>) => void;
     onError?: (error: XFetchError) => void;
+    onResponse?: (data: R | undefined, error: XFetchError | null) => void;
     /**
      * Ignores the fetch options of the {@link XContext}
      */
@@ -155,14 +156,16 @@ export function useXMutation<B = any, R = any, Q extends Params = Params, P exte
     );
 
     React.useEffect(() => {
-        if (isSuccess && options?.onSuccess) {
-            options.onSuccess(data as SuccessData<R>);
+        if (isSuccess) {
+            options?.onSuccess?.(data as SuccessData<R>);
+            options?.onResponse?.(data, null);
         }
     }, [isSuccess]);
 
     React.useEffect(() => {
-        if (error && options?.onError) {
-            options.onError(error);
+        if (error) {
+            options?.onError?.(error);
+            options?.onResponse?.(undefined, error);
         }
     }, [error]);
 

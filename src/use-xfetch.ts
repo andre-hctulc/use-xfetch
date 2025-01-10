@@ -25,6 +25,7 @@ export type UseXFetchOptions<R = any> = {
     swr?: SWRConfiguration<R, XFetchError>;
     onError?: (error: XFetchError) => void;
     onSuccess?: (data: R | undefined) => void;
+    onResponse?: (data: R | undefined, error: XFetchError | null) => void;
     disabled?: boolean;
     /**
      * Ignores the fetch options of the {@link XContext}
@@ -82,14 +83,16 @@ export function useXFetch<R = any, Q extends Params = Params, P extends Params =
         }
 
         // check if started. isValidating can idle to false if the query mounts as disabled
-        if (!query.isValidating && started.current && options?.onSuccess) {
-            options.onSuccess(query.data);
+        if (!query.isValidating && started.current) {
+            options?.onSuccess?.(query.data);
+            options?.onResponse?.(query.data, null);
         }
     }, [query.isValidating]);
 
     React.useEffect(() => {
-        if (query.error && options?.onError) {
-            options.onError(query.error);
+        if (query.error) {
+            options?.onError?.(query.error);
+            options?.onResponse?.(undefined, query.error);
         }
     }, [query.error]);
 
