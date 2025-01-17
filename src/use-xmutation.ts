@@ -17,24 +17,24 @@ We return a result object in the mutation functions,
 so we can differentiate between undefined (= error) and undefined (= no data). 
 */
 
-export type UseXMutateResult<B = any, R = any, Q extends Params = Params, P extends Params = Params> = {
+export type UseXMutation<B = any, R = any, Q extends Params = Params, P extends Params = Params> = {
     del: (
         params: UseXMutationParams<B, Q, P>,
         requestInit?: XRequestInit
-    ) => Promise<{ data: R } | undefined>;
+    ) => Promise<{ data: R; error: null } | { data: undefined; error: XFetchError }>;
     post: (
         params: UseXMutationParams<B, Q, P>,
         requestInit?: XRequestInit
-    ) => Promise<{ data: R } | undefined>;
+    ) => Promise<{ data: R; error: null } | { data: undefined; error: XFetchError }>;
     put: (
         params: UseXMutationParams<B, Q, P>,
         requestInit?: XRequestInit
-    ) => Promise<{ data: R } | undefined>;
+    ) => Promise<{ data: R; error: null } | { data: undefined; error: XFetchError }>;
     mutate: (
         method: string,
         params: UseXMutationParams<B, Q, P>,
         requestInit?: XRequestInit
-    ) => Promise<{ data: R } | undefined>;
+    ) => Promise<{ data: R; error: null } | { data: undefined; error: XFetchError }>;
     error: XFetchError | null;
     isSuccess: boolean;
     isMutating: boolean;
@@ -70,7 +70,7 @@ export type UseXMutationOptions<R = any> = {
 export function useXMutation<B = any, R = any, Q extends Params = Params, P extends Params = Params>(
     urlLike: string | Disabled,
     options?: UseXMutationOptions<R>
-): UseXMutateResult<B, R, Q, P> {
+): UseXMutation<B, R, Q, P> {
     const ctx = useXContext();
     const [error, setError] = React.useState<XFetchError | null>(null);
     const [isMutating, setIsMutating] = React.useState(false);
@@ -88,11 +88,12 @@ export function useXMutation<B = any, R = any, Q extends Params = Params, P exte
             const currentAbortController = (abortController.current = new AbortController());
 
             if (!urlLike) {
-                setError(new XFetchError(method, "Disabled", null, "useXMutation"));
+                const err = new XFetchError(method, "Disabled", null, "useXMutation");
+                setError(err);
                 setIsSuccess(false);
                 setIsMutating(false);
                 setData(undefined);
-                return undefined;
+                return { error: err, data: undefined };
             }
 
             setError(null);
@@ -123,7 +124,7 @@ export function useXMutation<B = any, R = any, Q extends Params = Params, P exte
                         setData(responseData);
                     }
 
-                    return { data: responseData };
+                    return { data: responseData, error: null };
                 })
                 .catch((err) => {
                     if (!currentAbortController.signal.aborted) {
@@ -131,7 +132,8 @@ export function useXMutation<B = any, R = any, Q extends Params = Params, P exte
                         setIsSuccess(false);
                         setData(undefined);
                     }
-                    throw err;
+
+                    return { error: err, data: undefined };
                 })
                 .finally(() => {
                     if (!currentAbortController.signal.aborted) setIsMutating(false);

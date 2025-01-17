@@ -18,7 +18,7 @@ export interface UseXInfiniteParams<R = any, Q extends Params = Params, P extend
     pathVariables?: P;
 }
 
-export type UseXInfiniteResult<R = any> = SWRInfiniteResponse<R, XFetchError>;
+export type UseXInfinite<R = any> = SWRInfiniteResponse<R, XFetchError>;
 
 export type UseXInfiniteOptions<R = any> = {
     requestInit?: XRequestInit;
@@ -48,7 +48,7 @@ export function useXInfinite<R = any, Q extends Params = Params, P extends Param
     urlLike: string | Disabled,
     params?: UseXInfiniteParams<Q, P> | Disabled,
     options?: UseXInfiniteOptions<R>
-): UseXInfiniteResult<R> {
+): UseXInfinite<R> {
     const ctx = useXContext();
     const started = React.useRef(false);
     const requestInit = mergeRequestInit(

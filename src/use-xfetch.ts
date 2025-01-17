@@ -18,7 +18,7 @@ export interface UseXFetchParams<Q extends Params = Params, P extends Params = P
     pathVariables?: P;
 }
 
-export type UseXFetchResult<R = any> = SWRResponse<R, XFetchError>;
+export type UseXFetch<R = any> = SWRResponse<R, XFetchError>;
 
 export type UseXFetchOptions<R = any> = {
     requestInit?: XRequestInit;
@@ -48,7 +48,7 @@ export function useXFetch<R = any, Q extends Params = Params, P extends Params =
     urlLike: string | Disabled,
     params: UseXFetchParams<Q, P> | Disabled,
     options?: UseXFetchOptions<R>
-): UseXFetchResult<R> {
+): UseXFetch<R> {
     const ctx = useXContext();
     const started = React.useRef(false);
     const requestInit = mergeRequestInit(
