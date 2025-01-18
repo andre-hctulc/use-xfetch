@@ -11,6 +11,8 @@ export interface UseXMutationParams<B = any, Q extends Params = Params, P extend
     body?: B;
 }
 
+export type XMutateResult<R = any> = { data: R; error: null } | { data: undefined; error: XFetchError };
+
 /*
 NOTE
 We return a result object in the mutation functions, 
@@ -18,23 +20,14 @@ so we can differentiate between undefined (= error) and undefined (= no data).
 */
 
 export type UseXMutation<B = any, R = any, Q extends Params = Params, P extends Params = Params> = {
-    del: (
-        params: UseXMutationParams<B, Q, P>,
-        requestInit?: XRequestInit
-    ) => Promise<{ data: R; error: null } | { data: undefined; error: XFetchError }>;
-    post: (
-        params: UseXMutationParams<B, Q, P>,
-        requestInit?: XRequestInit
-    ) => Promise<{ data: R; error: null } | { data: undefined; error: XFetchError }>;
-    put: (
-        params: UseXMutationParams<B, Q, P>,
-        requestInit?: XRequestInit
-    ) => Promise<{ data: R; error: null } | { data: undefined; error: XFetchError }>;
+    del: (params: UseXMutationParams<B, Q, P>, requestInit?: XRequestInit) => Promise<XMutateResult<R>>;
+    post: (params: UseXMutationParams<B, Q, P>, requestInit?: XRequestInit) => Promise<XMutateResult<R>>;
+    put: (params: UseXMutationParams<B, Q, P>, requestInit?: XRequestInit) => Promise<XMutateResult<R>>;
     mutate: (
         method: string,
         params: UseXMutationParams<B, Q, P>,
         requestInit?: XRequestInit
-    ) => Promise<{ data: R; error: null } | { data: undefined; error: XFetchError }>;
+    ) => Promise<XMutateResult<R>>;
     error: XFetchError | null;
     isSuccess: boolean;
     isMutating: boolean;

@@ -31,7 +31,7 @@ export interface XProviderProps {
     requestInit?: Partial<XRequestInit>;
     mutationsRequestInit?: Partial<XRequestInit>;
     fetchesRequestInit?: Partial<XRequestInit>;
-    infiniteRequestInit?: Partial<XRequestInit>;
+    infinitesRequestInit?: Partial<XRequestInit>;
     swrConfig?: SWRConfiguration;
 }
 
@@ -43,7 +43,7 @@ export function XProvider({
     requestInit,
     mutationsRequestInit,
     fetchesRequestInit,
-    infiniteRequestInit,
+    infinitesRequestInit,
     swrConfig,
 }: XProviderProps) {
     const prov = (
@@ -52,7 +52,7 @@ export function XProvider({
                 requestInit: requestInit || {},
                 mutationsRequestInit: mutationsRequestInit || {},
                 fetchesRequestInit: fetchesRequestInit || {},
-                infinitesRequestInit: infiniteRequestInit || {},
+                infinitesRequestInit: infinitesRequestInit || {},
             }}
         >
             {children}
