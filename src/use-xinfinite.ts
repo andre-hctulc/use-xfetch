@@ -53,7 +53,7 @@ export function useXInfinite<R = any, Q extends Params = Params, P extends Param
     const started = React.useRef(false);
     const requestInit = mergeRequestInit(
         options?.ignoreContext ? {} : ctx.requestInit,
-        options?.ignoreContext ? {} : ctx.infiniteRequestInit,
+        options?.ignoreContext ? {} : ctx.infinitesRequestInit,
         options?.requestInit || {}
     );
 

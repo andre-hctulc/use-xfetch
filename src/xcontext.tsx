@@ -8,7 +8,7 @@ export interface XContext {
     requestInit: Partial<XRequestInit>;
     mutationsRequestInit: Partial<XRequestInit>;
     fetchesRequestInit: Partial<XRequestInit>;
-    infiniteRequestInit: Partial<XRequestInit>;
+    infinitesRequestInit: Partial<XRequestInit>;
 }
 
 const XContext = React.createContext<XContext | undefined>(undefined);
@@ -16,7 +16,12 @@ const XContext = React.createContext<XContext | undefined>(undefined);
 export function useXContext(): XContext {
     const context = React.useContext(XContext);
     if (!context) {
-        return { requestInit: {}, mutationsRequestInit: {}, fetchesRequestInit: {}, infiniteRequestInit: {} };
+        return {
+            requestInit: {},
+            mutationsRequestInit: {},
+            fetchesRequestInit: {},
+            infinitesRequestInit: {},
+        };
     }
     return context;
 }
@@ -47,7 +52,7 @@ export function XProvider({
                 requestInit: requestInit || {},
                 mutationsRequestInit: mutationsRequestInit || {},
                 fetchesRequestInit: fetchesRequestInit || {},
-                infiniteRequestInit: infiniteRequestInit || {},
+                infinitesRequestInit: infiniteRequestInit || {},
             }}
         >
             {children}
