@@ -1,4 +1,4 @@
-import { xfetch, XRequestInit } from "@andre-hctulc/xfetch";
+import { xfetch, XRequestInit } from "@edgeshiftlabs/xfetch";
 import { mergeRequestInit, Params } from "./helpers.js";
 
 export interface FetcherParams {

@@ -1,4 +1,4 @@
-import { XRequestInit } from "@andre-hctulc/xfetch";
+import { XRequestInit } from "@edgeshiftlabs/xfetch";
 
 /**
  * Replaces path variables in the path with the values from the pathVariables object.
@@ -36,8 +36,10 @@ export function mergeRequestInit(...objs: XRequestInit[]) {
             // merge headers
             if (key === "headers") {
                 if (value instanceof Headers) {
-                    value.forEach((headerVal, headerName) => headers.set(headerName, headerVal));
-                } else if (value) {
+                    value.forEach((headerVal, headerName) => headers.append(headerName, headerVal));
+                } else if (Array.isArray(value)) {
+                    value.forEach(([headerName, headerVal]) => headers.append(headerName, headerVal as any));
+                } else if (value && typeof obj === "object") {
                     Object.entries(value).forEach(([headerName, headerVal]) =>
                         headers.append(headerName, headerVal as any)
                     );
@@ -52,7 +54,7 @@ export function mergeRequestInit(...objs: XRequestInit[]) {
                         if (Array.isArray(paramVal)) {
                             searchParams.delete(paramName);
                             paramVal.forEach((paramVal) => searchParams.append(paramName, paramVal as any));
-                        } else {
+                        } else if (paramVal !== undefined) {
                             searchParams.set(paramName, paramVal as any);
                         }
                     });

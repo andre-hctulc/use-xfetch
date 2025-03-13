@@ -1,13 +1,13 @@
 "use client";
 
-import { XFetchError, XRequestInit } from "@andre-hctulc/xfetch";
+import { XFetchError, XRequestInit } from "@edgeshiftlabs/xfetch";
 import React from "react";
 import { useXContext, XContext } from "./xcontext.js";
 import { Disabled, mergeRequestInit, Params, replacePathVariables } from "./helpers.js";
 import useSWRInfinite, { SWRInfiniteConfiguration, SWRInfiniteResponse } from "swr/infinite";
 import { createFetcher, FetcherParams } from "./fetcher.js";
 
-export interface UseXInfiniteParams<R = any, Q extends Params = Params, P extends Params = Params> {
+export interface UseXInfiniteParams<R = any, P extends Params = Params, Q extends Params = Params> {
     /**
      * Undefined values will be ignored. All other values will be stringified.
      */
@@ -41,12 +41,12 @@ export type UseXInfiniteOptions<R = any> = {
  * @param urlLike The URL to fetch. Can be a path or a full URL. Use path variables like _/api/:id_.
  *
  * @template R Response type
- * @template Q Query parameters type
  * @template P Path variables type
+ * @template Q Query parameters type
  */
-export function useXInfinite<R = any, Q extends Params = Params, P extends Params = Params>(
+export function useXInfinite<R = any, P extends Params = Params, Q extends Params = Params>(
     urlLike: string | Disabled,
-    params?: UseXInfiniteParams<Q, P> | Disabled,
+    params?: UseXInfiniteParams<P, Q> | Disabled,
     options?: UseXInfiniteOptions<R>
 ): UseXInfinite<R> {
     const ctx = useXContext();

@@ -1,11 +1,11 @@
 "use client";
 
-import { XRequestInit, XFetchError, xmutate } from "@andre-hctulc/xfetch";
+import { XRequestInit, XFetchError, xmutate } from "@edgeshiftlabs/xfetch";
 import React from "react";
 import { useXContext, XContext } from "./xcontext.js";
 import { Disabled, mergeRequestInit, Params, replacePathVariables } from "./helpers.js";
 
-export interface UseXMutationParams<B = any, Q extends Params = Params, P extends Params = Params> {
+export interface UseXMutationParams<B = any, P extends Params = Params, Q extends Params = Params> {
     pathVariables?: P;
     queryParams?: Q;
     body?: B;
@@ -19,13 +19,13 @@ We return a result object in the mutation functions,
 so we can differentiate between undefined (= error) and undefined (= no data). 
 */
 
-export type UseXMutation<B = any, R = any, Q extends Params = Params, P extends Params = Params> = {
-    del: (params: UseXMutationParams<B, Q, P>, requestInit?: XRequestInit) => Promise<XMutateResult<R>>;
-    post: (params: UseXMutationParams<B, Q, P>, requestInit?: XRequestInit) => Promise<XMutateResult<R>>;
-    put: (params: UseXMutationParams<B, Q, P>, requestInit?: XRequestInit) => Promise<XMutateResult<R>>;
+export type UseXMutation<B = any, R = any, P extends Params = Params, Q extends Params = Params> = {
+    del: (params: UseXMutationParams<B, P, Q>, requestInit?: XRequestInit) => Promise<XMutateResult<R>>;
+    post: (params: UseXMutationParams<B, P, Q>, requestInit?: XRequestInit) => Promise<XMutateResult<R>>;
+    put: (params: UseXMutationParams<B, P, Q>, requestInit?: XRequestInit) => Promise<XMutateResult<R>>;
     mutate: (
         method: string,
-        params: UseXMutationParams<B, Q, P>,
+        params: UseXMutationParams<B, P, Q>,
         requestInit?: XRequestInit
     ) => Promise<XMutateResult<R>>;
     error: XFetchError | null;
@@ -57,13 +57,13 @@ export type UseXMutationOptions<R = any> = {
  *
  * @template B Body type
  * @template R Response type
- * @template Q Query parameters type
  * @template P Path variables type
+ * @template Q Query parameters type
  */
-export function useXMutation<B = any, R = any, Q extends Params = Params, P extends Params = Params>(
+export function useXMutation<B = any, R = any, P extends Params = Params, Q extends Params = Params>(
     urlLike: string | Disabled,
     options?: UseXMutationOptions<R>
-): UseXMutation<B, R, Q, P> {
+): UseXMutation<B, R, P, Q> {
     const ctx = useXContext();
     const [error, setError] = React.useState<XFetchError | null>(null);
     const [isMutating, setIsMutating] = React.useState(false);
@@ -99,7 +99,7 @@ export function useXMutation<B = any, R = any, Q extends Params = Params, P exte
                     ? replacePathVariables(urlLike, { ...options?.pathVariables, ...params.pathVariables })
                     : urlLike;
 
-            return xmutate<R, B>(
+            return xmutate<B, R>(
                 method,
                 parsedPath,
                 params.body!,
