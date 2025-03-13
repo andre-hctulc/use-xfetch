@@ -30,6 +30,8 @@ export function mergeRequestInit(...objs: XRequestInit[]) {
     const searchParams: URLSearchParams = new URLSearchParams();
 
     objs.forEach((obj) => {
+        if (!obj) return;
+        
         Object.entries(obj).forEach(([key, value]) => {
             if (value === undefined) return;
 
