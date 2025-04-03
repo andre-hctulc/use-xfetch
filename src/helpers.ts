@@ -31,7 +31,7 @@ export function mergeRequestInit(...objs: XRequestInit[]) {
 
     objs.forEach((obj) => {
         if (!obj) return;
-        
+
         Object.entries(obj).forEach(([key, value]) => {
             if (value === undefined) return;
 
@@ -40,11 +40,15 @@ export function mergeRequestInit(...objs: XRequestInit[]) {
                 if (value instanceof Headers) {
                     value.forEach((headerVal, headerName) => headers.append(headerName, headerVal));
                 } else if (Array.isArray(value)) {
-                    value.forEach(([headerName, headerVal]) => headers.append(headerName, headerVal as any));
+                    value.forEach(([headerName, headerVal]) => {
+                        if (headerVal === undefined) return;
+                        headers.append(headerName, headerVal as any);
+                    });
                 } else if (value && typeof obj === "object") {
-                    Object.entries(value).forEach(([headerName, headerVal]) =>
-                        headers.append(headerName, headerVal as any)
-                    );
+                    Object.entries(value).forEach(([headerName, headerVal]) => {
+                        if (headerVal === undefined) return;
+                        headers.append(headerName, headerVal as any);
+                    });
                 }
             }
             // merge searchParams
@@ -62,7 +66,7 @@ export function mergeRequestInit(...objs: XRequestInit[]) {
                     });
                 }
             }
-            // merge the rest
+            // rest overwrites previous values
             else {
                 result[key as keyof XRequestInit] = value;
             }

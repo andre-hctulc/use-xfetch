@@ -96,5 +96,5 @@ export function useXFetch<R = any, P extends Params = Params, Q extends Params =
         }
     }, [query.error]);
 
-    return query;
+    return query
 }
