@@ -3,9 +3,8 @@
 import { XFetchError, XRequestInit } from "@edgeshiftlabs/xfetch";
 import useSWR, { SWRResponse, SWRConfiguration } from "swr";
 import { useXContext, XContext } from "./xcontext.js";
-import { Disabled, Params } from "./helpers.js";
 import { createFetcher } from "./fetcher.js";
-import { FetcherArgs } from "./types.js";
+import { Disabled, FetcherArgs, Params } from "./types.js";
 
 export interface UseXFetchParams<P extends Params = Params, Q extends Params = Params> {
     /**
