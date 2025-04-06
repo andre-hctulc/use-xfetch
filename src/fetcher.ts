@@ -1,22 +1,30 @@
-import { xfetch, XRequestInit } from "@edgeshiftlabs/xfetch";
-import { mergeRequestInit, Params } from "./helpers.js";
-
-export interface FetcherParams {
-    /**
-     * Undefined values will be ignored. All other values will be stringified.
-     */
-    queryParams?: Params;
-    /**
-     * Path variables to replace in the URL. The values are stringified.
-     */
-    path: string;
-    body: any;
-}
+import { xfetch } from "@edgeshiftlabs/xfetch";
+import { mergeRequestInit as mergeParams, replacePathVariables } from "./helpers.js";
+import { RequestInitPart, XCacheKey } from "./types.js";
 
 /**
  * Latter request inits take precedence over the former ones.
  */
-export function createFetcher<R>(requestInit: XRequestInit): (params: FetcherParams) => Promise<R> {
-    return ({ path, queryParams }: FetcherParams) =>
-        xfetch<R>(path, mergeRequestInit(requestInit, { queryParams }));
+export function createFetcher(
+    urlLike: string,
+    ...staticParams: RequestInitPart[]
+): { fetcher: (args: XCacheKey) => Promise<any>; key: XCacheKey } {
+    const staticArgs = mergeParams(...staticParams);
+    const url = replacePathVariables(urlLike, staticArgs.pathVariables || {});
+
+    const fetcher = (args: XCacheKey) => {
+        const dynamicArgs = mergeParams(staticArgs, args);
+        return xfetch(url, dynamicArgs);
+    };
+
+    const key: XCacheKey = {
+        url,
+        queryParams: staticArgs.queryParams || {},
+        body: staticArgs.body,
+    };
+
+    return {
+        key,
+        fetcher,
+    };
 }

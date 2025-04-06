@@ -7,7 +7,7 @@ import { XRequestInit } from "@edgeshiftlabs/xfetch";
  *
  * If the value for a path variable is not found, the variable is left as a placeholder.
  */
-export const replacePathVariables = (path: string, pathVariables: Record<string, string>) => {
+export const replacePathVariables = (path: string, pathVariables: Record<string, string | undefined>) => {
     return path.replace(/:([a-zA-Z0-9_]+)/g, (_, variable) => {
         const value = pathVariables[variable];
         // If the value is falsy, return the variable as a placeholder
@@ -24,10 +24,13 @@ export type Disabled = null | false | undefined | "" | 0;
 /**
  * Merges multiple request init objects. Latter request inits take precedence over the former ones.
  */
-export function mergeRequestInit(...objs: XRequestInit[]) {
-    const result: XRequestInit = {};
+export function mergeRequestInit(
+    ...objs: (XRequestInit & { pathVariables?: Params })[]
+): XRequestInit & { pathVariables?: Params | undefined } {
+    const result: XRequestInit & { pathVariables?: Params | undefined } = {};
     const headers: Headers = new Headers();
     const searchParams: URLSearchParams = new URLSearchParams();
+    const pathVariables: Params = {};
 
     objs.forEach((obj) => {
         if (!obj) return;
@@ -65,6 +68,12 @@ export function mergeRequestInit(...objs: XRequestInit[]) {
                         }
                     });
                 }
+            } else if (key === "pathVariables") {
+                Object.entries(value || {}).forEach(([paramName, paramVal]) => {
+                    if (paramVal !== undefined) {
+                        pathVariables[paramName] = paramVal;
+                    }
+                });
             }
             // rest overwrites previous values
             else {
@@ -75,6 +84,7 @@ export function mergeRequestInit(...objs: XRequestInit[]) {
 
     result.headers = headers;
     result.queryParams = searchParams;
+    result.pathVariables = pathVariables;
 
     return result;
 }

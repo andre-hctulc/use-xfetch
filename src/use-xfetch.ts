@@ -1,11 +1,11 @@
 "use client";
 
 import { XFetchError, XRequestInit } from "@edgeshiftlabs/xfetch";
-import React from "react";
 import useSWR, { SWRResponse, SWRConfiguration } from "swr";
 import { useXContext, XContext } from "./xcontext.js";
-import { Disabled, mergeRequestInit, Params, replacePathVariables } from "./helpers.js";
-import { createFetcher, FetcherParams } from "./fetcher.js";
+import { Disabled, Params } from "./helpers.js";
+import { createFetcher } from "./fetcher.js";
+import { StaticParams } from "./types.js";
 
 export interface UseXFetchParams<P extends Params = Params, Q extends Params = Params> {
     /**
@@ -23,9 +23,6 @@ export type UseXFetch<R = any> = SWRResponse<R, XFetchError>;
 export type UseXFetchOptions<R = any> = {
     requestInit?: XRequestInit;
     swr?: SWRConfiguration<R, XFetchError>;
-    onError?: (error: XFetchError) => void;
-    onSuccess?: (data: R | undefined) => void;
-    onResponse?: (data: R | undefined, error: XFetchError | null) => void;
     disabled?: boolean;
     /**
      * Ignores the fetch options of the {@link XContext}
@@ -44,57 +41,32 @@ export type UseXFetchOptions<R = any> = {
  * @template P Path variables type
  * @template Q Query parameters type
  */
-export function useXFetch<R = any, P extends Params = Params, Q extends Params = Params>(
+export function useXFetch<R = any, P extends Params = Params, Q extends Params = Params, B = any>(
     urlLike: string | Disabled,
-    params: UseXFetchParams<P, Q> | Disabled,
+    params: StaticParams<P, Q, B> | null,
     options?: UseXFetchOptions<R>
 ): UseXFetch<R> {
     const ctx = useXContext();
-    const started = React.useRef(false);
-    const requestInit = mergeRequestInit(
-        options?.ignoreContext ? {} : ctx.requestInit,
-        options?.ignoreContext ? {} : ctx.fetchesRequestInit,
-        options?.requestInit || {}
-    );
 
-    const parsedPath = React.useMemo<string | null>(() => {
-        // control disabled by checking if params or urlLike is falsy
-        if (!params || !urlLike || options?.disabled) return null;
-        return params.pathVariables ? replacePathVariables(urlLike, params.pathVariables) : urlLike;
-    }, [urlLike, params && params.pathVariables]);
-
-    const key: null | FetcherParams =
-        params && parsedPath
-            ? {
-                  path: parsedPath,
-                  queryParams: params.queryParams,
-                  body: options?.bodyKey ?? requestInit.body,
-              }
-            : null;
+    const { fetcher, key } =
+        urlLike && params && !options?.disabled
+            ? createFetcher(
+                  urlLike,
+                  options?.ignoreContext ? {} : ctx.requestInit,
+                  options?.ignoreContext ? {} : ctx.fetchesRequestInit,
+                  options?.requestInit || {},
+                  {
+                      pathVariables: params.pathVariables,
+                      queryParams: params.queryParams,
+                      body: options?.bodyKey ?? params.body,
+                  }
+              )
+            : {};
 
     const query = useSWR<R, XFetchError>(key, {
-        fetcher: createFetcher<R>(requestInit),
+        fetcher,
         ...options?.swr,
     });
 
-    React.useEffect(() => {
-        if (query.isValidating) {
-            started.current = true;
-        }
-
-        // check if started. isValidating can idle to false if the query mounts as disabled
-        if (!query.isValidating && started.current) {
-            options?.onSuccess?.(query.data);
-            options?.onResponse?.(query.data, null);
-        }
-    }, [query.isValidating]);
-
-    React.useEffect(() => {
-        if (query.error) {
-            options?.onError?.(query.error);
-            options?.onResponse?.(undefined, query.error);
-        }
-    }, [query.error]);
-
-    return query
+    return query;
 }

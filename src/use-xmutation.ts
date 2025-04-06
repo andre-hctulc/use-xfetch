@@ -1,173 +1,76 @@
 "use client";
 
-import { XRequestInit, XFetchError, xmutate } from "@edgeshiftlabs/xfetch";
-import React from "react";
+import { XFetchError, XRequestInit } from "@edgeshiftlabs/xfetch";
 import { useXContext, XContext } from "./xcontext.js";
-import { Disabled, mergeRequestInit, Params, replacePathVariables } from "./helpers.js";
+import { Params } from "./helpers.js";
+import { createFetcher } from "./fetcher.js";
+import useSWRMutation, { SWRMutationConfiguration, SWRMutationResponse } from "swr/mutation";
+import { FetcherArgs, StaticParams, XCacheKey } from "./types.js";
 
-export interface UseXMutationParams<B = any, P extends Params = Params, Q extends Params = Params> {
-    pathVariables?: P;
-    queryParams?: Q;
-    body?: B;
-}
+export type UseXMutationParams<B = any, Q extends Params = Params> = FetcherArgs<Q, B>;
 
-export type XMutateResult<R = any> = { data: R; error: null } | { data: undefined; error: XFetchError };
+export type UseXMutation<R = any, B = any, Q extends Params = Params> = SWRMutationResponse<
+    R,
+    XFetchError,
+    XCacheKey,
+    UseXMutationParams<B, Q>
+>;
 
-/*
-NOTE
-We return a result object in the mutation functions, 
-so we can differentiate between undefined (= error) and undefined (= no data). 
-*/
-
-export type UseXMutation<B = any, R = any, P extends Params = Params, Q extends Params = Params> = {
-    del: (params: UseXMutationParams<B, P, Q>, requestInit?: XRequestInit) => Promise<XMutateResult<R>>;
-    post: (params: UseXMutationParams<B, P, Q>, requestInit?: XRequestInit) => Promise<XMutateResult<R>>;
-    put: (params: UseXMutationParams<B, P, Q>, requestInit?: XRequestInit) => Promise<XMutateResult<R>>;
-    mutate: (
-        method: string,
-        params: UseXMutationParams<B, P, Q>,
-        requestInit?: XRequestInit
-    ) => Promise<XMutateResult<R>>;
-    error: XFetchError | null;
-    isSuccess: boolean;
-    isMutating: boolean;
-    isError: boolean;
-    data: R | undefined;
-};
-
-type SuccessData<R> = Exclude<R, undefined> extends never ? undefined : Exclude<R, undefined>;
-
-export type UseXMutationOptions<R = any> = {
-    /**
-     * Static path variables. These are overwritten by the path variables in the params.
-     */
-    pathVariables?: Params;
+export type UseXMutationOptions<R = any, B = any, Q extends Params = Params, G = R> = {
     requestInit?: XRequestInit;
-    onSuccess?: (data: SuccessData<R>) => void;
-    onError?: (error: XFetchError) => void;
-    onResponse?: (data: R | undefined, error: XFetchError | null) => void;
+    swr?: SWRMutationConfiguration<R, XFetchError, XCacheKey, UseXMutationParams<B, Q>, G> & {
+        throwOnError?: boolean;
+    };
     /**
      * Ignores the fetch options of the {@link XContext}
      */
     ignoreContext?: boolean;
+    /**
+     * Use this key in the swr key instead of the whole body
+     */
+    bodyKey?: any;
 };
 
 /**
- * @param urlLike The URL to fetch. Can be a path or a full URL. Use path variables like _/api/:id_.
+ * Method default to POST.
  *
- * @template B Body type
+ * Default SWR options:
+ * - `populateCache: false`
+ * - `revalidate: true`
+ *
+ * @param urlLike The URL to fetch. Can be a path or a full URL. Use path variables like _/api/:id_.
+ * @param params Static params to merge the trigger ars with.
+ *
  * @template R Response type
+ * @template B Body type
  * @template P Path variables type
  * @template Q Query parameters type
+ * @template G Get type - The type returned by `useSWR` for the same path. Defaults to `R`
  */
-export function useXMutation<B = any, R = any, P extends Params = Params, Q extends Params = Params>(
-    urlLike: string | Disabled,
-    options?: UseXMutationOptions<R>
-): UseXMutation<B, R, P, Q> {
+export function useXMutation<R = any, B = any, P extends Params = Params, Q extends Params = Params, G = R>(
+    urlLike: string,
+    params: StaticParams<P, Q, B>,
+    options?: UseXMutationOptions<R, B, Q, G>
+): UseXMutation<R, B, Q> {
     const ctx = useXContext();
-    const [error, setError] = React.useState<XFetchError | null>(null);
-    const [isMutating, setIsMutating] = React.useState(false);
-    const [isSuccess, setIsSuccess] = React.useState(false);
-    const [data, setData] = React.useState<R | undefined>(undefined);
-    const isError = error !== null;
-    const abortController = React.useRef<AbortController | null>(null);
-
-    const mutate = React.useCallback(
-        async (method: string, params: UseXMutationParams<B>, requestInit?: XRequestInit) => {
-            if (abortController.current) {
-                abortController.current.abort();
-            }
-
-            const currentAbortController = (abortController.current = new AbortController());
-
-            if (!urlLike) {
-                const err = new XFetchError(method, "Disabled", null, "useXMutation");
-                setError(err);
-                setIsSuccess(false);
-                setIsMutating(false);
-                setData(undefined);
-                return { error: err, data: undefined };
-            }
-
-            setError(null);
-            setIsSuccess(false);
-            setIsMutating(true);
-            setData(undefined);
-
-            const parsedPath =
-                params.pathVariables || options?.pathVariables
-                    ? replacePathVariables(urlLike, { ...options?.pathVariables, ...params.pathVariables })
-                    : urlLike;
-
-            return xmutate<B, R>(
-                method,
-                parsedPath,
-                params.body!,
-                mergeRequestInit(
-                    options?.ignoreContext ? {} : ctx.requestInit,
-                    options?.ignoreContext ? {} : ctx.mutationsRequestInit,
-                    options?.requestInit || {},
-                    requestInit || {}
-                )
-            )
-                .then((responseData) => {
-                    if (!currentAbortController.signal.aborted) {
-                        setIsSuccess(true);
-                        setError(null);
-                        setData(responseData);
-                    }
-
-                    return { data: responseData, error: null };
-                })
-                .catch((err) => {
-                    if (!currentAbortController.signal.aborted) {
-                        setError(err);
-                        setIsSuccess(false);
-                        setData(undefined);
-                    }
-
-                    return { error: err, data: undefined };
-                })
-                .finally(() => {
-                    if (!currentAbortController.signal.aborted) setIsMutating(false);
-                });
-        },
-        [urlLike, options, ctx]
-    );
-
-    const del = React.useCallback(
-        (params: UseXMutationParams<B>, requestInit?: XRequestInit) => mutate("DELETE", params, requestInit),
-        [mutate]
-    );
-
-    const post = React.useCallback(
-        (params: UseXMutationParams<B>, requestInit?: XRequestInit) => mutate("POST", params, requestInit),
-        [mutate]
-    );
-
-    const put = React.useCallback(
-        (params: UseXMutationParams<B>, requestInit?: XRequestInit) => mutate("PUT", params, requestInit),
-        [mutate]
-    );
-
-    React.useEffect(() => {
-        if (isSuccess) {
-            options?.onSuccess?.(data as SuccessData<R>);
-            options?.onResponse?.(data, null);
+    const { key, fetcher } = createFetcher(
+        urlLike,
+        { method: "POST" },
+        options?.ignoreContext ? {} : ctx.requestInit,
+        options?.ignoreContext ? {} : ctx.mutationsRequestInit,
+        options?.requestInit || {},
+        {
+            queryParams: params.queryParams,
+            pathVariables: params.pathVariables,
+            body: params.body,
         }
-    }, [isSuccess]);
-
-    React.useEffect(() => {
-        if (error) {
-            options?.onError?.(error);
-            options?.onResponse?.(undefined, error);
-        }
-    }, [error]);
-
-    const mutation = React.useMemo(
-        () => ({ del, post, put, mutate, error, isSuccess, isMutating, isError, data }),
-        [del, post, put, mutate, error, isSuccess, isMutating, isError, data]
     );
+
+    const mutation = useSWRMutation<R, XFetchError, XCacheKey, UseXMutationParams<B, Q>, G>(key, fetcher, {
+        populateCache: false,
+        revalidate: true,
+        ...options?.swr,
+    });
 
     return mutation;
 }

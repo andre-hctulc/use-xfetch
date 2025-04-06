@@ -1,11 +1,11 @@
 "use client";
 
 import { XFetchError, XRequestInit } from "@edgeshiftlabs/xfetch";
-import React from "react";
 import { useXContext, XContext } from "./xcontext.js";
-import { Disabled, mergeRequestInit, Params, replacePathVariables } from "./helpers.js";
+import { Disabled, Params, replacePathVariables } from "./helpers.js";
 import useSWRInfinite, { SWRInfiniteConfiguration, SWRInfiniteResponse } from "swr/infinite";
-import { createFetcher, FetcherParams } from "./fetcher.js";
+import { createFetcher } from "./fetcher.js";
+import { XCacheKey } from "./types.js";
 
 export interface UseXInfiniteParams<R = any, P extends Params = Params, Q extends Params = Params> {
     /**
@@ -15,7 +15,7 @@ export interface UseXInfiniteParams<R = any, P extends Params = Params, Q extend
     /**
      * Path variables to replace in the URL. The values are stringified.
      */
-    pathVariables?: P;
+    pathVariables?: P | ((index: number, previousData: R | undefined) => P);
 }
 
 export type UseXInfinite<R = any> = SWRInfiniteResponse<R, XFetchError>;
@@ -23,8 +23,6 @@ export type UseXInfinite<R = any> = SWRInfiniteResponse<R, XFetchError>;
 export type UseXInfiniteOptions<R = any> = {
     requestInit?: XRequestInit;
     swr?: SWRInfiniteConfiguration<R, XFetchError>;
-    onError?: (error: XFetchError) => void;
-    onSuccess?: (data: R[] | undefined) => void;
     disabled?: boolean;
     /**
      * Ignores the fetch options of the {@link XContext}
@@ -46,62 +44,50 @@ export type UseXInfiniteOptions<R = any> = {
  */
 export function useXInfinite<R = any, P extends Params = Params, Q extends Params = Params>(
     urlLike: string | Disabled,
-    params?: UseXInfiniteParams<P, Q> | Disabled,
+    params: UseXInfiniteParams<P, Q> | Disabled,
     options?: UseXInfiniteOptions<R>
 ): UseXInfinite<R> {
     const ctx = useXContext();
-    const started = React.useRef(false);
-    const requestInit = mergeRequestInit(
-        options?.ignoreContext ? {} : ctx.requestInit,
-        options?.ignoreContext ? {} : ctx.infinitesRequestInit,
-        options?.requestInit || {}
-    );
 
-    const parsedPath = React.useMemo<string | null>(() => {
-        // control disabled by checking if params or urlLike is falsy
-        if (!params || !urlLike || options?.disabled) return null;
-        return params.pathVariables ? replacePathVariables(urlLike, params.pathVariables) : urlLike;
-    }, [urlLike, params && params?.pathVariables]);
-
+    const { fetcher, key } =
+        params && urlLike
+            ? createFetcher(
+                  urlLike,
+                  options?.ignoreContext ? {} : ctx.requestInit,
+                  options?.ignoreContext ? {} : ctx.infinitesRequestInit,
+                  options?.requestInit || {}
+              )
+            : {};
     const infinite = useSWRInfinite<R, XFetchError>(
         (index, previousData) => {
-            if (!params || !parsedPath) return null;
+            if (!key || !params) return null;
 
-            const fetcherParams: FetcherParams & { index: number; infinite: boolean } = {
-                path: parsedPath,
+            let url = key.url;
+
+            if (typeof params.pathVariables === "function") {
+                url = replacePathVariables(url, params.pathVariables(index, previousData));
+            } else if (params.pathVariables) {
+                url = replacePathVariables(url, params.pathVariables);
+            }
+
+            const fetcherParams: XCacheKey = {
+                url,
                 queryParams:
                     typeof params.queryParams === "function"
                         ? params.queryParams(index, previousData)
                         : params.queryParams,
+                body: options?.bodyKey ? options.bodyKey(index) : options?.requestInit?.body,
                 index,
                 infinite: true,
-                body: options?.bodyKey ? options.bodyKey(index) : requestInit.body,
             };
 
             return fetcherParams;
         },
         {
-            fetcher: createFetcher<R>(requestInit),
+            fetcher,
             ...options?.swr,
         }
     );
-
-    React.useEffect(() => {
-        if (infinite.isValidating) {
-            started.current = true;
-        }
-
-        // check if started. isValidating can idle to false if the query mounts as disabled
-        if (!infinite.isValidating && started.current && options?.onSuccess) {
-            options.onSuccess(infinite.data);
-        }
-    }, [infinite.isValidating]);
-
-    React.useEffect(() => {
-        if (infinite.error && options?.onError) {
-            options.onError(infinite.error);
-        }
-    }, [infinite.error]);
 
     return infinite;
 }
