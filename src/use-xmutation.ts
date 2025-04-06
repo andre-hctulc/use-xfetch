@@ -40,7 +40,7 @@ export type UseXMutationOptions<
 };
 
 /**
- * Method default to POST.
+ * Method default to _POST_.
  *
  * Default SWR options:
  * - `populateCache: false`
@@ -67,7 +67,7 @@ export function useXMutation<R = any, B = any, P extends Params = Params, Q exte
               options?.ignoreContext ? {} : ctx.requestInit,
               options?.ignoreContext ? {} : ctx.mutationsRequestInit,
               options?.requestInit || {},
-              options?.method ? { method: options.method } : {},
+              { method: options?.method ?? options?.requestInit?.method ?? "POST" },
               {
                   queryParams: params.queryParams,
                   pathVariables: params.pathVariables,
