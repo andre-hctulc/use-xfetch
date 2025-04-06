@@ -16,7 +16,14 @@ export function createFetcher(
     // `arg` - given in `useSWRMutation` context
     const fetcher = (key: XCacheKey, { arg }: { arg?: FetcherArgs } = {}) => {
         // Caution: `arg` is not reflected in swr key (especially `arg.pathVariables`).
-        const dynamicArgs = mergeParams(staticArgs, key, arg || {});
+        const dynamicArgs = mergeParams(
+            {
+                ...staticArgs,
+                pathVariables: key.pathVariables,
+                queryParams: key.queryParams,
+            },
+            arg || {}
+        );
         const url = replacePathVariables(urlLike, dynamicArgs.pathVariables || {});
         return xfetch(url, dynamicArgs);
     };

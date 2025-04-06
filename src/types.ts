@@ -26,9 +26,7 @@ export type RequestInitPart<P extends Params = Params, Q extends Params = Params
     XRequestInit;
 
 /**
- * The Keys used to cache
- *
- * {@link FetcherArgs} must be a subset of this
+ * Keys used in SWR cache.
  */
 export type XCacheKey = {
     urlLike: string;
