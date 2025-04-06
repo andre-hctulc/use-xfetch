@@ -13,6 +13,8 @@ export function createFetcher(
     const url = replacePathVariables(urlLike, staticArgs.pathVariables || {});
 
     const fetcher = (args: XCacheKey) => {
+        // We cannot mutate the url inside fetcher,
+        // // because the fetch url would mismatch the url in the swr key
         const dynamicArgs = mergeParams(staticArgs, args);
         return xfetch(url, dynamicArgs);
     };

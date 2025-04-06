@@ -2,7 +2,7 @@
 
 import { XFetchError, XRequestInit } from "@edgeshiftlabs/xfetch";
 import { useXContext, XContext } from "./xcontext.js";
-import { Params } from "./helpers.js";
+import { Disabled, Params } from "./helpers.js";
 import { createFetcher } from "./fetcher.js";
 import useSWRMutation, { SWRMutationConfiguration, SWRMutationResponse } from "swr/mutation";
 import { FetcherArgs, StaticParams, XCacheKey } from "./types.js";
@@ -49,22 +49,29 @@ export type UseXMutationOptions<R = any, B = any, Q extends Params = Params, G =
  */
 export function useXMutation<R = any, B = any, P extends Params = Params, Q extends Params = Params, G = R>(
     urlLike: string,
-    params: StaticParams<P, Q, B>,
+    params: StaticParams<P, Q, B> | Disabled,
     options?: UseXMutationOptions<R, B, Q, G>
 ): UseXMutation<R, B, Q> {
     const ctx = useXContext();
-    const { key, fetcher } = createFetcher(
-        urlLike,
-        { method: "POST" },
-        options?.ignoreContext ? {} : ctx.requestInit,
-        options?.ignoreContext ? {} : ctx.mutationsRequestInit,
-        options?.requestInit || {},
-        {
-            queryParams: params.queryParams,
-            pathVariables: params.pathVariables,
-            body: params.body,
-        }
-    );
+    const { key, fetcher } = params
+        ? createFetcher(
+              urlLike,
+              { method: "POST" },
+              options?.ignoreContext ? {} : ctx.requestInit,
+              options?.ignoreContext ? {} : ctx.mutationsRequestInit,
+              options?.requestInit || {},
+              {
+                  queryParams: params.queryParams,
+                  pathVariables: params.pathVariables,
+                  body: params.body,
+              }
+          )
+        : {
+              key: { url: "$$invalid" },
+              fetcher: () => {
+                  throw new XFetchError("", "Mutation disabled", null, undefined);
+              },
+          };
 
     const mutation = useSWRMutation<R, XFetchError, XCacheKey, UseXMutationParams<B, Q>, G>(key, fetcher, {
         populateCache: false,
