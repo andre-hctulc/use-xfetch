@@ -62,7 +62,7 @@ export function useXInfinite<R = any, P extends Params = Params, Q extends Param
         (index, previousData) => {
             if (!key || !params) return null;
 
-            let url = key.url;
+            let url = key.urlLike;
 
             if (typeof params.pathVariables === "function") {
                 url = replacePathVariables(url, params.pathVariables(index, previousData));
@@ -71,7 +71,7 @@ export function useXInfinite<R = any, P extends Params = Params, Q extends Param
             }
 
             const fetcherParams: XCacheKey = {
-                url,
+                urlLike: url,
                 queryParams:
                     typeof params.queryParams === "function"
                         ? params.queryParams(index, previousData)

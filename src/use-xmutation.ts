@@ -5,22 +5,30 @@ import { useXContext, XContext } from "./xcontext.js";
 import { Disabled, Params } from "./helpers.js";
 import { createFetcher } from "./fetcher.js";
 import useSWRMutation, { SWRMutationConfiguration, SWRMutationResponse } from "swr/mutation";
-import { FetcherArgs, StaticParams, XCacheKey } from "./types.js";
+import { FetcherArgs, XCacheKey } from "./types.js";
 
-export type UseXMutationParams<B = any, Q extends Params = Params> = FetcherArgs<Q, B>;
+export type UseXMutation<
+    R = any,
+    B = any,
+    P extends Params = Params,
+    Q extends Params = Params
+> = SWRMutationResponse<R, XFetchError, XCacheKey, FetcherArgs<P, Q, B>>;
 
-export type UseXMutation<R = any, B = any, Q extends Params = Params> = SWRMutationResponse<
-    R,
-    XFetchError,
-    XCacheKey,
-    UseXMutationParams<B, Q>
->;
-
-export type UseXMutationOptions<R = any, B = any, Q extends Params = Params, G = R> = {
+export type UseXMutationOptions<
+    R = any,
+    B = any,
+    P extends Params = Params,
+    Q extends Params = Params,
+    G = R
+> = {
     requestInit?: XRequestInit;
-    swr?: SWRMutationConfiguration<R, XFetchError, XCacheKey, UseXMutationParams<B, Q>, G> & {
-        throwOnError?: boolean;
-    };
+    swr?: Omit<
+        SWRMutationConfiguration<R, XFetchError, XCacheKey, FetcherArgs<P, Q, B>, G> & {
+            throwOnError?: boolean;
+        },
+        "fetcher"
+    >;
+    method?: string;
     /**
      * Ignores the fetch options of the {@link XContext}
      */
@@ -49,17 +57,17 @@ export type UseXMutationOptions<R = any, B = any, Q extends Params = Params, G =
  */
 export function useXMutation<R = any, B = any, P extends Params = Params, Q extends Params = Params, G = R>(
     urlLike: string,
-    params: StaticParams<P, Q, B> | Disabled,
-    options?: UseXMutationOptions<R, B, Q, G>
-): UseXMutation<R, B, Q> {
+    params: FetcherArgs<P, Q, B> | Disabled,
+    options?: UseXMutationOptions<R, B, P, Q, G>
+): UseXMutation<R, B, P, Q> {
     const ctx = useXContext();
     const { key, fetcher } = params
         ? createFetcher(
               urlLike,
-              { method: "POST" },
               options?.ignoreContext ? {} : ctx.requestInit,
               options?.ignoreContext ? {} : ctx.mutationsRequestInit,
               options?.requestInit || {},
+              options?.method ? { method: options.method } : {},
               {
                   queryParams: params.queryParams,
                   pathVariables: params.pathVariables,
@@ -67,13 +75,13 @@ export function useXMutation<R = any, B = any, P extends Params = Params, Q exte
               }
           )
         : {
-              key: { url: "$$invalid" },
+              key: { urlLike: "$$invalid" },
               fetcher: () => {
                   throw new XFetchError("", "Mutation disabled", null, undefined);
               },
           };
 
-    const mutation = useSWRMutation<R, XFetchError, XCacheKey, UseXMutationParams<B, Q>, G>(key, fetcher, {
+    const mutation = useSWRMutation<R, XFetchError, XCacheKey, FetcherArgs<P, Q, B>, G>(key, fetcher, {
         populateCache: false,
         revalidate: true,
         ...options?.swr,

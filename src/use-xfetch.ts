@@ -5,7 +5,7 @@ import useSWR, { SWRResponse, SWRConfiguration } from "swr";
 import { useXContext, XContext } from "./xcontext.js";
 import { Disabled, Params } from "./helpers.js";
 import { createFetcher } from "./fetcher.js";
-import { StaticParams } from "./types.js";
+import { FetcherArgs } from "./types.js";
 
 export interface UseXFetchParams<P extends Params = Params, Q extends Params = Params> {
     /**
@@ -43,7 +43,7 @@ export type UseXFetchOptions<R = any> = {
  */
 export function useXFetch<R = any, P extends Params = Params, Q extends Params = Params, B = any>(
     urlLike: string | Disabled,
-    params: StaticParams<P, Q, B> | Disabled,
+    params: FetcherArgs<P, Q, B> | Disabled,
     options?: UseXFetchOptions<R>
 ): UseXFetch<R> {
     const ctx = useXContext();
