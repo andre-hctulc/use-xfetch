@@ -4,6 +4,11 @@ import { Params } from "./helpers.js";
 export interface FetcherArgs<P extends Params = Params, Q extends Params = Params, B = any> {
     queryParams?: Q;
     body?: B;
+    /**
+     * When used in dynamic context (mutation arg `trigger({pathVariables: {...}})`),
+     * these will **not be reflected in the swr key** and therefore might interfere with other routes or cause other issues,
+     * so use it carefully!
+     */
     pathVariables?: P;
 }
 
@@ -28,7 +33,7 @@ export type RequestInitPart<P extends Params = Params, Q extends Params = Params
 export type XCacheKey = {
     urlLike: string;
     pathVariables?: Params;
-    body?: any;
+    custom?: any;
     queryParams?: Params;
     index?: number;
     infinite?: boolean;

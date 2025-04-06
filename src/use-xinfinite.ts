@@ -33,6 +33,10 @@ export type UseXInfiniteOptions<R = any> = {
      * Use this key in the swr key instead of the whole body
      */
     bodyKey?: (pageIndex: number) => any;
+    /**
+     * Adds a custom part to the SWR key, to further distinguish the request.
+     */
+    customKeyPart?: any;
 };
 
 /**
@@ -53,6 +57,7 @@ export function useXInfinite<R = any, P extends Params = Params, Q extends Param
         params && urlLike
             ? createFetcher(
                   urlLike,
+                  options?.customKeyPart,
                   options?.ignoreContext ? {} : ctx.requestInit,
                   options?.ignoreContext ? {} : ctx.infinitesRequestInit,
                   options?.requestInit || {}
@@ -72,7 +77,7 @@ export function useXInfinite<R = any, P extends Params = Params, Q extends Param
                     typeof params.queryParams === "function"
                         ? params.queryParams(index, previousData)
                         : params.queryParams,
-                body: options?.bodyKey ? options.bodyKey(index) : options?.requestInit?.body,
+                custom: options?.bodyKey ? options.bodyKey(index) : options?.requestInit?.body,
                 index,
                 infinite: true,
             };

@@ -34,9 +34,9 @@ export type UseXMutationOptions<
      */
     ignoreContext?: boolean;
     /**
-     * Use this key in the swr key instead of the whole body
+     * Adds a custom part to the SWR key, to further distinguish the request.
      */
-    bodyKey?: any;
+    customKeyPart?: any;
 };
 
 /**
@@ -64,14 +64,17 @@ export function useXMutation<R = any, B = any, P extends Params = Params, Q exte
     const { key, fetcher } = params
         ? createFetcher(
               urlLike,
+              options?.customKeyPart,
               options?.ignoreContext ? {} : ctx.requestInit,
               options?.ignoreContext ? {} : ctx.mutationsRequestInit,
               options?.requestInit || {},
+              // Set method
               { method: options?.method ?? options?.requestInit?.method ?? "POST" },
               {
+                  // paths vars and query is merged with other objects
                   queryParams: params.queryParams,
                   pathVariables: params.pathVariables,
-                  body: params.body,
+                  body: params.body ?? options?.requestInit?.body,
               }
           )
         : {

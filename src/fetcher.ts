@@ -7,6 +7,7 @@ import { FetcherArgs, RequestInitPart, XCacheKey } from "./types.js";
  */
 export function createFetcher(
     urlLike: string,
+    customKeyPart: any,
     ...staticParams: RequestInitPart[]
 ): { fetcher: (args: XCacheKey) => Promise<any>; key: XCacheKey } {
     const staticArgs = mergeParams(...staticParams);
@@ -14,8 +15,7 @@ export function createFetcher(
     // `key` - given in `useSWR`, `useInfinite and, `useSWRMutation` context
     // `arg` - given in `useSWRMutation` context
     const fetcher = (key: XCacheKey, { arg }: { arg?: FetcherArgs } = {}) => {
-        // We cannot mutate the url inside fetcher,
-        // // because the fetch url would mismatch the url in the swr key
+        // Caution: `arg` is not reflected in swr key (especially `arg.pathVariables`).
         const dynamicArgs = mergeParams(staticArgs, key, arg || {});
         const url = replacePathVariables(urlLike, dynamicArgs.pathVariables || {});
         return xfetch(url, dynamicArgs);
@@ -25,7 +25,7 @@ export function createFetcher(
         urlLike,
         pathVariables: staticArgs.pathVariables,
         queryParams: staticArgs.queryParams || {},
-        body: staticArgs.body,
+        custom: customKeyPart,
     };
 
     return {

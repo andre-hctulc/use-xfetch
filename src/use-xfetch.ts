@@ -29,9 +29,9 @@ export type UseXFetchOptions<R = any> = {
      */
     ignoreContext?: boolean;
     /**
-     * Use this key in the swr key instead of the whole body
+     * Adds a custom part to the SWR key, to further distinguish the request.
      */
-    bodyKey?: any;
+    customKeyPart?: any;
 };
 
 /**
@@ -52,13 +52,15 @@ export function useXFetch<R = any, P extends Params = Params, Q extends Params =
         urlLike && params && !options?.disabled
             ? createFetcher(
                   urlLike,
+                  options?.customKeyPart,
                   options?.ignoreContext ? {} : ctx.requestInit,
                   options?.ignoreContext ? {} : ctx.fetchesRequestInit,
                   options?.requestInit || {},
                   {
+                      // paths vars and query is merged with other objects
                       pathVariables: params.pathVariables,
                       queryParams: params.queryParams,
-                      body: options?.bodyKey ?? params.body,
+                      body: params.body ?? options?.requestInit?.body,
                   }
               )
             : {};
