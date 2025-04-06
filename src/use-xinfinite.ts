@@ -2,10 +2,9 @@
 
 import { XFetchError, XRequestInit } from "@edgeshiftlabs/xfetch";
 import { useXContext, XContext } from "./xcontext.js";
-import { Disabled, Params } from "./helpers.js";
 import useSWRInfinite, { SWRInfiniteConfiguration, SWRInfiniteResponse } from "swr/infinite";
 import { createFetcher } from "./fetcher.js";
-import { XCacheKey } from "./types.js";
+import type { Disabled, Params, XCacheKey } from "./types.js";
 
 export interface UseXInfiniteParams<R = any, P extends Params = Params, Q extends Params = Params> {
     /**

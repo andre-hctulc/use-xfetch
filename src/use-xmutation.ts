@@ -2,10 +2,9 @@
 
 import { XFetchError, XRequestInit } from "@edgeshiftlabs/xfetch";
 import { useXContext, XContext } from "./xcontext.js";
-import { Disabled, Params } from "./helpers.js";
 import { createFetcher } from "./fetcher.js";
 import useSWRMutation, { SWRMutationConfiguration, SWRMutationResponse } from "swr/mutation";
-import { FetcherArgs, PartialFetcherArgs, XCacheKey } from "./types.js";
+import { Disabled, FetcherArgs, Params, PartialFetcherArgs, XCacheKey } from "./types.js";
 
 export type UseXMutation<
     R = any,
@@ -22,12 +21,7 @@ export type UseXMutationOptions<
     G = R
 > = {
     requestInit?: XRequestInit;
-    swr?: Omit<
-        SWRMutationConfiguration<R, XFetchError, XCacheKey, FetcherArgs<P, Q, B>, G> & {
-            throwOnError?: boolean;
-        },
-        "fetcher"
-    >;
+    swr?: Omit<SWRMutationConfiguration<R, XFetchError, XCacheKey, FetcherArgs<P, Q, B>, G>, "fetcher">;
     method?: string;
     /**
      * Ignores the fetch options of the {@link XContext}

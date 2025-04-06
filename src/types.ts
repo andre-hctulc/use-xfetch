@@ -1,6 +1,8 @@
-import { XRequestInit } from "@edgeshiftlabs/xfetch";
-import { Params } from "./helpers.js";
+import type { XFetchError, XRequestInit } from "@edgeshiftlabs/xfetch";
 
+export type Params = Record<string, any>;
+
+export type Disabled = null | false | undefined | "" | 0;
 export interface FetcherArgs<P extends Params = Params, Q extends Params = Params, B = any> {
     queryParams?: Q;
     body?: B;
@@ -36,3 +38,13 @@ export type XCacheKey = {
     index?: number;
     infinite?: boolean;
 };
+
+export type SafeResult<T> =
+    | {
+          data: T;
+          error: null;
+      }
+    | {
+          data: undefined;
+          error: XFetchError;
+      };

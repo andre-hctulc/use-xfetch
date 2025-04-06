@@ -1,5 +1,5 @@
-import { XRequestInit } from "@edgeshiftlabs/xfetch";
-import { XCacheKey } from "./types.js";
+import { XFetchError, XRequestInit } from "@edgeshiftlabs/xfetch";
+import { Params, SafeResult, XCacheKey } from "./types.js";
 
 /**
  * Replaces path variables in the path with the values from the pathVariables object.
@@ -17,10 +17,6 @@ export const replacePathVariables = (path: string, pathVariables: Record<string,
         return value + "";
     });
 };
-
-export type Params = Record<string, any>;
-
-export type Disabled = null | false | undefined | "" | 0;
 
 /**
  * Merges multiple request init objects. Latter request inits take precedence over the former ones.
@@ -108,4 +104,22 @@ export function mergeRequestInit(
 
 export function isCacheKey(key: unknown): key is XCacheKey {
     return typeof key === "object" && !!key && typeof (key as any).url === "string";
+}
+
+/**
+ * Safely awaits a `mutate` Promise and returns the result.
+ */
+export async function safeTrigger<T>(
+    trigger: Promise<T>,
+    onError?: (error: XFetchError) => void
+): Promise<SafeResult<T>> {
+    try {
+        const result = await trigger;
+        return { data: result, error: null };
+    } catch (error) {
+        if (XFetchError.is(error)) {
+            onError?.(error);
+        }
+        return { data: undefined, error: error as XFetchError };
+    }
 }
