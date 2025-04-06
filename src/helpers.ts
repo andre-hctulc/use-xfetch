@@ -1,4 +1,5 @@
 import { XRequestInit } from "@edgeshiftlabs/xfetch";
+import { XCacheKey } from "./types.js";
 
 /**
  * Replaces path variables in the path with the values from the pathVariables object.
@@ -87,4 +88,8 @@ export function mergeRequestInit(
     result.pathVariables = pathVariables;
 
     return result;
+}
+
+export function isCacheKey(key: unknown): key is XCacheKey {
+    return typeof key === "object" && !!key && typeof (key as any).url === "string";
 }

@@ -43,7 +43,7 @@ export type UseXFetchOptions<R = any> = {
  */
 export function useXFetch<R = any, P extends Params = Params, Q extends Params = Params, B = any>(
     urlLike: string | Disabled,
-    params: StaticParams<P, Q, B> | null,
+    params: StaticParams<P, Q, B> | Disabled,
     options?: UseXFetchOptions<R>
 ): UseXFetch<R> {
     const ctx = useXContext();
