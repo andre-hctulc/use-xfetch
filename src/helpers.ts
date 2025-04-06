@@ -30,7 +30,7 @@ export function mergeRequestInit(
 ): XRequestInit & { pathVariables?: Params | undefined } {
     const result: XRequestInit & { pathVariables?: Params | undefined } = {};
     const headers: Headers = new Headers();
-    const searchParams: URLSearchParams = new URLSearchParams();
+    const searchParams: Record<string, string[]> = {};
     const pathVariables: Params = {};
 
     objs.forEach((obj) => {
@@ -51,21 +51,37 @@ export function mergeRequestInit(
                 } else if (value && typeof obj === "object") {
                     Object.entries(value).forEach(([headerName, headerVal]) => {
                         if (headerVal === undefined) return;
-                        headers.append(headerName, headerVal as any);
+
+                        if (Array.isArray(headerVal)) {
+                            headerVal.forEach((val) => {
+                                headers.append(headerName, val as any);
+                            });
+                        } else {
+                            headers.append(headerName, headerVal as any);
+                        }
                     });
                 }
             }
             // merge searchParams
             else if (key === "queryParams") {
                 if (value instanceof URLSearchParams) {
-                    value.forEach((paramVal, paramName) => searchParams.set(paramName, paramVal));
+                    value.forEach((paramVal, paramName) => {
+                        if (paramVal === undefined) return;
+                        searchParams[paramName] = searchParams[paramName] || [];
+                        searchParams[paramName].push(paramVal);
+                    });
                 } else if (value) {
                     Object.entries(value).forEach(([paramName, paramVal]) => {
+                        if (paramVal === undefined) return;
+
+                        searchParams[paramName] = searchParams[paramName] || [];
+
                         if (Array.isArray(paramVal)) {
-                            searchParams.delete(paramName);
-                            paramVal.forEach((paramVal) => searchParams.append(paramName, paramVal as any));
-                        } else if (paramVal !== undefined) {
-                            searchParams.set(paramName, paramVal as any);
+                            paramVal.forEach((val) => {
+                                searchParams[paramName].push(val as any);
+                            });
+                        } else {
+                            searchParams[paramName].push(paramVal as any);
                         }
                     });
                 }

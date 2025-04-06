@@ -5,7 +5,7 @@ import { useXContext, XContext } from "./xcontext.js";
 import { Disabled, Params } from "./helpers.js";
 import { createFetcher } from "./fetcher.js";
 import useSWRMutation, { SWRMutationConfiguration, SWRMutationResponse } from "swr/mutation";
-import { FetcherArgs, XCacheKey } from "./types.js";
+import { FetcherArgs, PartialFetcherArgs, XCacheKey } from "./types.js";
 
 export type UseXMutation<
     R = any,
@@ -47,7 +47,7 @@ export type UseXMutationOptions<
  * - `revalidate: true`
  *
  * @param urlLike The URL to fetch. Can be a path or a full URL. Use path variables like _/api/:id_.
- * @param params Static params to merge the trigger ars with.
+ * @param params Static (partial) params to merge the trigger args with.
  *
  * @template R Response type
  * @template B Body type
@@ -57,7 +57,7 @@ export type UseXMutationOptions<
  */
 export function useXMutation<R = any, B = any, P extends Params = Params, Q extends Params = Params, G = R>(
     urlLike: string,
-    params: FetcherArgs<P, Q, B> | Disabled,
+    params: PartialFetcherArgs<P, Q, B> | Disabled,
     options?: UseXMutationOptions<R, B, P, Q, G>
 ): UseXMutation<R, B, P, Q> {
     const ctx = useXContext();

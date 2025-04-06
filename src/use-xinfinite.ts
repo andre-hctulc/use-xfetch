@@ -2,7 +2,7 @@
 
 import { XFetchError, XRequestInit } from "@edgeshiftlabs/xfetch";
 import { useXContext, XContext } from "./xcontext.js";
-import { Disabled, Params, replacePathVariables } from "./helpers.js";
+import { Disabled, Params } from "./helpers.js";
 import useSWRInfinite, { SWRInfiniteConfiguration, SWRInfiniteResponse } from "swr/infinite";
 import { createFetcher } from "./fetcher.js";
 import { XCacheKey } from "./types.js";
@@ -60,18 +60,14 @@ export function useXInfinite<R = any, P extends Params = Params, Q extends Param
             : {};
     const infinite = useSWRInfinite<R, XFetchError>(
         (index, previousData) => {
-            if (!key || !params) return null;
-
-            let url = key.urlLike;
-
-            if (typeof params.pathVariables === "function") {
-                url = replacePathVariables(url, params.pathVariables(index, previousData));
-            } else if (params.pathVariables) {
-                url = replacePathVariables(url, params.pathVariables);
-            }
+            if (!urlLike || key || !params) return null;
 
             const fetcherParams: XCacheKey = {
-                urlLike: url,
+                urlLike,
+                pathVariables:
+                    typeof params.pathVariables === "function"
+                        ? params.pathVariables(index, previousData)
+                        : params.pathVariables,
                 queryParams:
                     typeof params.queryParams === "function"
                         ? params.queryParams(index, previousData)
