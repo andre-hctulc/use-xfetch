@@ -5,6 +5,9 @@ export type Params = Record<string, any>;
 export type Disabled = null | false | undefined | "" | 0;
 export interface FetcherArgs<P extends Params = Params, Q extends Params = Params, B = any> {
     queryParams?: Q;
+    /**
+     * The body is **not part of the swr key**!. Use `customKeyPart` to add custom key parts.
+     */
     body?: B;
     /**
      * When used in dynamic context (mutation arg `trigger({pathVariables: {...}})`),

@@ -39,6 +39,7 @@ export type UseXFetchOptions<R = any> = {
  * @template R Response type
  * @template P Path variables type
  * @template Q Query parameters type
+ * @template B Body type
  */
 export function useXFetch<R = any, P extends Params = Params, Q extends Params = Params, B = any>(
     urlLike: string | Disabled,

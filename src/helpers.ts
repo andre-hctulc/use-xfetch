@@ -103,7 +103,7 @@ export function mergeRequestInit(
 }
 
 export function isCacheKey(key: unknown): key is XCacheKey {
-    return typeof key === "object" && !!key && typeof (key as any).url === "string";
+    return typeof key === "object" && !!key && typeof (key as XCacheKey).urlLike === "string";
 }
 
 /**
