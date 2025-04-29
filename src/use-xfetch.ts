@@ -1,6 +1,6 @@
 "use client";
 
-import { XFetchError, XRequestInit } from "@edgeshiftlabs/xfetch";
+import { XFetchError, XRequestInit } from "@dre44/xfetch";
 import useSWR, { SWRResponse, SWRConfiguration } from "swr";
 import { useXContext, XContext } from "./xcontext.js";
 import { createFetcher } from "./fetcher.js";

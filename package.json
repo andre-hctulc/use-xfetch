@@ -1,6 +1,6 @@
 {
-    "name": "@edgeshiftlabs/use-xfetch",
-    "version": "1.0.12",
+    "name": "@dre44/use-xfetch",
+    "version": "1.2.0",
     "description": "swr 💛 xfetch",
     "main": "dist/index.js",
     "type": "module",
@@ -22,7 +22,7 @@
         "url": "https://github.com/andre-hctulc/use-xfetch.git"
     },
     "dependencies": {
-        "@edgeshiftlabs/xfetch": "^0.1.1",
+        "@dre44/xfetch": "^0.2.0",
         "swr": "^2.2.5"
     }
 }

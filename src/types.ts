@@ -1,4 +1,4 @@
-import type { XFetchError, XRequestInit } from "@edgeshiftlabs/xfetch";
+import type { XFetchError, XRequestInit } from "@dre44/xfetch";
 
 export type Params = Record<string, any>;
 
@@ -46,8 +46,10 @@ export type SafeResult<T> =
     | {
           data: T;
           error: null;
+          success: true;
       }
     | {
           data: undefined;
           error: XFetchError;
+          success: false;
       };

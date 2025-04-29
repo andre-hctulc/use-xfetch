@@ -1,6 +1,6 @@
 "use client";
 
-import { XRequestInit } from "@edgeshiftlabs/xfetch";
+import { XRequestInit } from "@dre44/xfetch";
 import React from "react";
 import { SWRConfig, SWRConfiguration } from "swr";
 

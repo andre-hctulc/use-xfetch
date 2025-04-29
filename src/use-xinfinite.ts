@@ -1,6 +1,6 @@
 "use client";
 
-import { XFetchError, XRequestInit } from "@edgeshiftlabs/xfetch";
+import { XFetchError, XRequestInit } from "@dre44/xfetch";
 import { useXContext, XContext } from "./xcontext.js";
 import useSWRInfinite, { SWRInfiniteConfiguration, SWRInfiniteResponse } from "swr/infinite";
 import { createFetcher } from "./fetcher.js";

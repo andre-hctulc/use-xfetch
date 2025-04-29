@@ -1,4 +1,4 @@
-import { xfetch } from "@edgeshiftlabs/xfetch";
+import { xfetch } from "@dre44/xfetch";
 import { mergeRequestInit as mergeParams, replacePathVariables } from "./helpers.js";
 import { FetcherArgs, RequestInitPart, XCacheKey } from "./types.js";
 

@@ -1,4 +1,4 @@
-import { XFetchError, XRequestInit } from "@edgeshiftlabs/xfetch";
+import { XFetchError, XRequestInit } from "@dre44/xfetch";
 import { Params, SafeResult, XCacheKey } from "./types.js";
 
 /**
@@ -115,11 +115,11 @@ export async function safeTrigger<T>(
 ): Promise<SafeResult<T>> {
     try {
         const result = await trigger;
-        return { data: result, error: null };
+        return { data: result, error: null, success: true };
     } catch (error) {
         if (XFetchError.is(error)) {
             onError?.(error);
         }
-        return { data: undefined, error: error as XFetchError };
+        return { data: undefined, error: error as XFetchError, success: false };
     }
 }
