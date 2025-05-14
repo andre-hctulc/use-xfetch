@@ -1,5 +1,5 @@
 import { xfetch } from "@dre44/xfetch";
-import { mergeRequestInit as mergeParams, replacePathVariables } from "./helpers.js";
+import { mergeRequestInit as mergeParams } from "./helpers.js";
 import { FetcherArgs, RequestInitPart, XCacheKey } from "./types.js";
 
 /**
@@ -24,8 +24,7 @@ export function createFetcher(
             },
             arg || {}
         );
-        const url = replacePathVariables(urlLike, dynamicArgs.pathVariables || {});
-        return xfetch(url, dynamicArgs);
+        return xfetch(urlLike, dynamicArgs);
     };
 
     const key: XCacheKey = {

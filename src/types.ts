@@ -28,7 +28,7 @@ export type RequestInitPart<P extends Params = Params, Q extends Params = Params
     Q,
     B
 > &
-    XRequestInit;
+    Omit<XRequestInit, "pathVariables">;
 
 /**
  * Keys used in SWR cache.
