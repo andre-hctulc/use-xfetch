@@ -1,8 +1,6 @@
 import { XFetchError, XRequestInit } from "@dre44/xfetch";
 import { Params, SafeResult, XCacheKey } from "./types.js";
 
-
-
 /**
  * Merges multiple request init objects. Latter request inits take precedence over the former ones.
  */
@@ -95,11 +93,11 @@ export function isCacheKey(key: unknown): key is XCacheKey {
  * Safely awaits a `mutate` Promise and returns the result.
  */
 export async function safeTrigger<T>(
-    trigger: Promise<T>,
+    trigger: Promise<T> | (() => Promise<T>),
     onError?: (error: XFetchError) => void
 ): Promise<SafeResult<T>> {
     try {
-        const result = await trigger;
+        const result = trigger instanceof Promise ? await trigger : await trigger();
         return { data: result, error: null, success: true };
     } catch (error) {
         if (XFetchError.is(error)) {
