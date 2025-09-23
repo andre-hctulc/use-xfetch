@@ -1,3 +1,10 @@
 # use-xfetch
 
-[SWR](https://swr.vercel.app) 💛 [xfetch](https://www.npmjs.com/package/@edgeshiftlabs/xfetch) 
+[SWR](https://swr.vercel.app) ⊕ [xfetch](https://www.npmjs.com/package/@edgeshiftlabs/xfetch)
+
+## API
+
+-   `useXFetch`
+-   `useXMutation`
+-   `useXInfinite`
+-   `useXCache`

@@ -4,16 +4,16 @@ import { useCallback } from "react";
 import { isCacheKey } from "./helpers.js";
 
 interface UseXCacheResult {
-    mutate: (match: (key: XCacheKey) => boolean, data?: any) => Promise<void>;
+    mutate: (match: (key: XCacheKey) => boolean, data?: any) => Promise<any[]>;
 }
 
 export function useXCache(): UseXCacheResult {
     const { mutate } = useSWRConfig();
     const _mutate = useCallback(
         async (match: (key: XCacheKey) => boolean, data?: any) => {
-            await mutate((key: unknown) => {
+            return mutate((key: unknown) => {
                 if (!isCacheKey(key)) {
-                    return;
+                    return false;
                 }
                 return match(key);
             }, data);
