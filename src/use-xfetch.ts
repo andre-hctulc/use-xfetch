@@ -31,6 +31,7 @@ export type UseXFetchOptions<R = any> = {
      * Adds a custom part to the SWR key, to further distinguish the request.
      */
     customKeyPart?: any;
+    method?: string;
 };
 
 /**
@@ -56,6 +57,8 @@ export function useXFetch<R = any, P extends Params = Params, Q extends Params =
                   options?.ignoreContext ? {} : ctx.requestInit,
                   options?.ignoreContext ? {} : ctx.fetchesRequestInit,
                   options?.requestInit || {},
+                  // Set method
+                  { method: options?.method ?? options?.requestInit?.method ?? "GET" },
                   {
                       // paths vars and query is merged with other objects
                       pathVariables: params.pathVariables,
