@@ -1,7 +1,7 @@
 {
     "name": "@dre44/use-xfetch",
     "version": "1.8.1",
-    "description": "swr 💛 xfetch",
+    "description": "SWR + xfetch",
     "main": "dist/index.js",
     "type": "module",
     "scripts": {
@@ -22,7 +22,7 @@
         "url": "https://github.com/andre-hctulc/use-xfetch.git"
     },
     "dependencies": {
-        "@dre44/xfetch": "^0.5.0",
+        "@dre44/xfetch": "^0.5.1",
         "swr": "^2.2.5"
     }
 }
