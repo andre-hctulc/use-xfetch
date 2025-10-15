@@ -22,7 +22,7 @@
         "url": "https://github.com/andre-hctulc/use-xfetch.git"
     },
     "dependencies": {
-        "@dre44/xfetch": "^0.5.1",
+        "@dre44/xfetch": "^0.5.2",
         "swr": "^2.2.5"
     }
 }
