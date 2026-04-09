@@ -74,7 +74,7 @@ export function useXMutation<R = any, B = any, P extends Params = Params, Q exte
         : {
               key: { urlLike: "$$invalid" },
               fetcher: () => {
-                  throw new XFetchError("", "Mutation disabled", null, undefined);
+                  throw XFetchError.offside("Mutation disabled");
               },
           };
 
