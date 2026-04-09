@@ -1,5 +1,5 @@
 import { useSWRConfig } from "swr";
-import { XCacheKey } from "./types.js";
+import type { XCacheKey } from "./types.js";
 import { useCallback } from "react";
 import { isCacheKey } from "./helpers.js";
 

@@ -1,10 +1,10 @@
 "use client";
 
-import { XFetchError, XRequestInit } from "@dre44/xfetch";
-import useSWR, { SWRResponse, SWRConfiguration } from "swr";
-import { useXContext, XContext } from "./xcontext.js";
+import { XFetchError, type XRequestInit } from "@dre44/xfetch";
+import useSWR, { type SWRResponse, type SWRConfiguration } from "swr";
+import { useXContext, type XContext } from "./xcontext.js";
 import { createFetcher } from "./fetcher.js";
-import { Disabled, FetcherArgs, Params } from "./types.js";
+import type { Disabled, FetcherArgs, Params } from "./types.js";
 
 export interface UseXFetchParams<P extends Params = Params, Q extends Params = Params> {
     /**
@@ -45,7 +45,7 @@ export type UseXFetchOptions<R = any> = {
 export function useXFetch<R = any, P extends Params = Params, Q extends Params = Params, B = any>(
     urlLike: string | Disabled,
     params: FetcherArgs<P, Q, B> | Disabled,
-    options?: UseXFetchOptions<R>
+    options?: UseXFetchOptions<R>,
 ): UseXFetch<R> {
     const ctx = useXContext();
 
@@ -64,7 +64,7 @@ export function useXFetch<R = any, P extends Params = Params, Q extends Params =
                       pathVariables: params.pathVariables,
                       queryParams: params.queryParams,
                       body: params.body ?? options?.requestInit?.body,
-                  }
+                  },
               )
             : {};
 

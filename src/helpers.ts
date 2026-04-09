@@ -1,5 +1,5 @@
-import { XFetchError, XRequestInit } from "@dre44/xfetch";
-import { Params, SafeResult, XCacheKey } from "./types.js";
+import { XFetchError, type XRequestInit } from "@dre44/xfetch";
+import type { Params, SafeResult, XCacheKey } from "./types.js";
 
 /**
  * Merges multiple request init objects. Latter request inits take precedence over the former ones.

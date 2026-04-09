@@ -1,8 +1,8 @@
 "use client";
 
-import { XFetchError, XRequestInit } from "@dre44/xfetch";
-import { useXContext, XContext } from "./xcontext.js";
-import useSWRInfinite, { SWRInfiniteConfiguration, SWRInfiniteResponse } from "swr/infinite";
+import { XFetchError, type XRequestInit } from "@dre44/xfetch";
+import { useXContext, type XContext } from "./xcontext.js";
+import useSWRInfinite, { type SWRInfiniteConfiguration, type SWRInfiniteResponse } from "swr/infinite";
 import { createFetcher } from "./fetcher.js";
 import type { Disabled, Params, XCacheKey } from "./types.js";
 
@@ -48,7 +48,7 @@ export type UseXInfiniteOptions<R = any> = {
 export function useXInfinite<R = any, P extends Params = Params, Q extends Params = Params>(
     urlLike: string | Disabled,
     params: UseXInfiniteParams<P, Q> | Disabled,
-    options?: UseXInfiniteOptions<R>
+    options?: UseXInfiniteOptions<R>,
 ): UseXInfinite<R> {
     const ctx = useXContext();
 
@@ -59,7 +59,7 @@ export function useXInfinite<R = any, P extends Params = Params, Q extends Param
                   options?.customKeyPart,
                   options?.ignoreContext ? {} : ctx.requestInit,
                   options?.ignoreContext ? {} : ctx.infinitesRequestInit,
-                  options?.requestInit || {}
+                  options?.requestInit || {},
               )
             : {};
     const infinite = useSWRInfinite<R, XFetchError>(
@@ -86,7 +86,7 @@ export function useXInfinite<R = any, P extends Params = Params, Q extends Param
         {
             fetcher,
             ...options?.swr,
-        }
+        },
     );
 
     return infinite;

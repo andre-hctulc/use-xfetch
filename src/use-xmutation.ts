@@ -1,16 +1,16 @@
 "use client";
 
-import { XFetchError, XRequestInit } from "@dre44/xfetch";
-import { useXContext, XContext } from "./xcontext.js";
+import { XFetchError, type XRequestInit } from "@dre44/xfetch";
+import { useXContext, type XContext } from "./xcontext.js";
 import { createFetcher } from "./fetcher.js";
-import useSWRMutation, { SWRMutationConfiguration, SWRMutationResponse } from "swr/mutation";
-import { Disabled, FetcherArgs, Params, PartialFetcherArgs, XCacheKey } from "./types.js";
+import useSWRMutation, { type SWRMutationConfiguration, type SWRMutationResponse } from "swr/mutation";
+import type { Disabled, FetcherArgs, Params, PartialFetcherArgs, XCacheKey } from "./types.js";
 
 export type UseXMutation<
     R = any,
     B = any,
     P extends Params = Params,
-    Q extends Params = Params
+    Q extends Params = Params,
 > = SWRMutationResponse<R, XFetchError, XCacheKey, FetcherArgs<P, Q, B>>;
 
 export type UseXMutationOptions<
@@ -18,7 +18,7 @@ export type UseXMutationOptions<
     B = any,
     P extends Params = Params,
     Q extends Params = Params,
-    G = R
+    G = R,
 > = {
     requestInit?: XRequestInit;
     swr?: Omit<SWRMutationConfiguration<R, XFetchError, XCacheKey, FetcherArgs<P, Q, B>, G>, "fetcher">;
@@ -52,7 +52,7 @@ export type UseXMutationOptions<
 export function useXMutation<R = any, B = any, P extends Params = Params, Q extends Params = Params, G = R>(
     urlLike: string,
     params: PartialFetcherArgs<P, Q, B> | Disabled,
-    options?: UseXMutationOptions<R, B, P, Q, G>
+    options?: UseXMutationOptions<R, B, P, Q, G>,
 ): UseXMutation<R, B, P, Q> {
     const ctx = useXContext();
     const { key, fetcher } = params
@@ -69,7 +69,7 @@ export function useXMutation<R = any, B = any, P extends Params = Params, Q exte
                   queryParams: params.queryParams,
                   pathVariables: params.pathVariables,
                   body: params.body ?? options?.requestInit?.body,
-              }
+              },
           )
         : {
               key: { urlLike: "$$invalid" },

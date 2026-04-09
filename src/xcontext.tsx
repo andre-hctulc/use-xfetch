@@ -1,8 +1,8 @@
 "use client";
 
-import { XRequestInit } from "@dre44/xfetch";
+import type { XRequestInit } from "@dre44/xfetch";
 import React from "react";
-import { SWRConfig, SWRConfiguration } from "swr";
+import { SWRConfig, type SWRConfiguration } from "swr";
 
 export interface XContext {
     requestInit: Partial<XRequestInit>;

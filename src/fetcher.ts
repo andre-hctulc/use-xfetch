@@ -1,6 +1,6 @@
 import { xfetch } from "@dre44/xfetch";
 import { mergeRequestInit as mergeParams } from "./helpers.js";
-import { FetcherArgs, RequestInitPart, XCacheKey } from "./types.js";
+import type { FetcherArgs, RequestInitPart, XCacheKey } from "./types.js";
 
 /**
  * Latter request inits take precedence over the former ones.
